@@ -1,6 +1,6 @@
 {
   "project": "yeri",
-  "exportedAt": "2026-07-15T11:26:39.870321+00:00",
+  "exportedAt": "2026-07-15T11:44:52.070276+00:00",
   "items": [
     {
       "id": "seed-01",
@@ -15,7 +15,7 @@
       "type": "디자인",
       "priority": "A",
       "content": "사이트 색상 테마를 바꿉니다. 지금의 남색+금색 조합 대신 → 배경은 흰색 유지, 주요 색은 차콜 그레이(#2D3748), 포인트 색은 연한 피치 핑크(#E5A99E). 젊은 뷰티·디자인 분야 고객이 타겟이라 트렌디한 분위기를 원함 (참고 사이트와 같은 느낌). — 참고: yerioh28.wixsite.com/my-site-22, feedback/image.png",
-      "status": "대기",
+      "status": "완료",
       "meta": {
         "userAgent": "",
         "viewport": ""

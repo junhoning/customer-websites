@@ -1,15 +1,16 @@
-/* ========== [1층] Primitive — export 하지 않는다. 컴포넌트에서 직접 사용 금지 ========== */
+/* ========== [1층] Primitive — export 하지 않는다. 컴포넌트에서 직접 사용 금지 ==========
+   테마: "모던 차콜 & 소프트 피치 핑크" (피드백 1번, 2026-07-15 반영) */
 const palette = {
-  navy50: "#eef3fa",
-  navy600: "#1e498a",
-  navy700: "#16386a",
-  navy800: "#10294c",
-  navy900: "#0b1f3a",
+  charcoal50: "#f1f4f8",
+  charcoal600: "#4a5568",
+  charcoal700: "#2d3748", // 고객 지정 브랜드색
+  charcoal800: "#232d3d",
+  charcoal900: "#1a202c",
 
-  gold100: "#f6edd8",
-  gold500: "#c8a34e",
-  gold600: "#b8912f",
-  gold700: "#846818",
+  peach100: "#faece8",
+  peach500: "#e5a99e", // 고객 지정 포인트색
+  peach600: "#d18d80",
+  peach700: "#a8655a",
 
   red400: "#ff6568",
   red600: "#e40014",
@@ -28,16 +29,16 @@ export const theme = {
     line: "#e4e8f0", // 보더/구분선
 
     /* 브랜드 역할 */
-    primary: palette.navy700, // 주 버튼 배경
-    primaryStrong: palette.navy800, // 어두운 배너, 헤딩 텍스트
-    primaryDeep: palette.navy900, // 히어로 그라디언트 시작
-    primaryHover: palette.navy600, // hover, focus 보더
-    primaryTint: palette.navy50, // 밝은 칩/배지 배경
+    primary: palette.charcoal700, // 주 버튼 배경
+    primaryStrong: palette.charcoal800, // 어두운 배너, 헤딩 텍스트
+    primaryDeep: palette.charcoal900, // 히어로 그라디언트 시작
+    primaryHover: palette.charcoal600, // hover, focus 보더
+    primaryTint: palette.charcoal50, // 밝은 칩/배지 배경
 
-    accent: palette.gold500, // 골드 포인트(버튼, 장식선)
-    accentHover: palette.gold600,
-    accentText: palette.gold700, // 라벨, 필수(*) 표시
-    accentTint: palette.gold100,
+    accent: palette.peach500, // 피치 포인트(버튼, 장식선)
+    accentHover: palette.peach600,
+    accentText: palette.peach700, // 라벨, 필수(*) 표시
+    accentTint: palette.peach100,
 
     /* 상태 */
     danger: palette.red600, // 폼 에러 메시지
