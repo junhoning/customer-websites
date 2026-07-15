@@ -1,0 +1,9 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# 안전망 (고객 폴더별 .gitignore가 1차 담당)
+node_modules/
+.next/
+*.tsbuildinfo
+__pycache__/
