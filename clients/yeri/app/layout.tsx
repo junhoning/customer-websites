@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import StyledComponentsRegistry from "@/lib/registry";
 import Providers from "@/app/providers";
 import { nanumMyeongjo, pretendard } from "@/app/fonts";
@@ -22,6 +23,12 @@ export const metadata: Metadata = {
   },
 };
 
+/* 리뷰 배포 전용 피드백 위젯 — 환경변수가 꺼진 빌드(실제 오픈)에는 포함되지 않는다 */
+const feedbackWidgetSrc =
+  process.env.NEXT_PUBLIC_FEEDBACK === "1"
+    ? process.env.NEXT_PUBLIC_FEEDBACK_URL
+    : undefined;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,6 +45,14 @@ export default function RootLayout({
             <FloatingActions />
           </Providers>
         </StyledComponentsRegistry>
+        {feedbackWidgetSrc && (
+          <Script
+            src={feedbackWidgetSrc}
+            data-project="yeri"
+            data-seed="/feedback-seed.json"
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );
