@@ -99,9 +99,9 @@ let t1 = JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0];
 assert.equal(t1.comments.length, 2, "답글이 저장되지 않음");
 assert.equal(t1.comments[1].body, "반영해 주셔서 감사합니다");
 
-const replyDel = s1.querySelector('button[aria-label="Delete reply"]');
-assert.ok(replyDel, "내 답글에 삭제 버튼이 없음");
-replyDel.click();
+const delBtns = s1.querySelectorAll('button[aria-label="Delete comment"]');
+assert.equal(delBtns.length, 2, "코멘트마다 삭제 버튼이 없음");
+delBtns[1].click(); // 답글 삭제
 await wait(60);
 assert.ok(btnByText(s1, "Delete"), "삭제 확인 모달이 안 뜸");
 btnByText(s1, "Cancel").click();
@@ -111,7 +111,7 @@ assert.equal(
   2,
   "취소했는데 답글이 삭제됨",
 );
-s1.querySelector('button[aria-label="Delete reply"]').click();
+s1.querySelectorAll('button[aria-label="Delete comment"]')[1].click();
 await wait(60);
 btnByText(s1, "Delete").click();
 await wait(60);
@@ -119,6 +119,19 @@ assert.equal(
   JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0].comments.length,
   1,
   "확인했는데 답글이 안 지워짐",
+);
+
+// 7-1) 코멘트 수정 — 연필 → 인라인 편집기 → Save
+s1.querySelector('button[aria-label="Edit comment"]').click();
+await wait(60);
+setValue(w1, s1.querySelector(".fbw-thread").parentElement.querySelector("textarea"), "수정된 본문");
+await wait(30);
+btnByText(s1, "Save").click();
+await wait(60);
+assert.equal(
+  JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0].comments[0].body,
+  "수정된 본문",
+  "코멘트 수정이 저장 안 됨",
 );
 
 // 8) 완료 처리 — resolved 저장, 핀 걷힘, 사이드바 완료됨 그룹으로
@@ -245,6 +258,20 @@ const ov3 = JSON.parse(w3.localStorage.getItem("fbw:v2:overrides:default"));
 assert.equal(ov3["seed-01"].addedComments.length, 1, "시드 답글이 override로 영속화 안 됨");
 assert.equal(ov3["seed-01"].addedComments[0].body, "시드에 단 답글");
 
+// 시드 원본 코멘트 수정도 override(editedBodies)로 영속화된다
+s3.querySelector('button[aria-label="Edit comment"]').click();
+await wait(60);
+setValue(w3, s3.querySelector(".fbw-thread").parentElement.querySelector("textarea"), "시드 원본 수정본");
+await wait(30);
+btnByText(s3, "Save").click();
+await wait(60);
+const ov3b = JSON.parse(w3.localStorage.getItem("fbw:v2:overrides:default"));
+assert.equal(
+  Object.values(ov3b["seed-01"].editedBodies)[0],
+  "시드 원본 수정본",
+  "시드 수정이 override로 영속화 안 됨",
+);
+
 const w4 = await boot((w) => {
   w.sessionStorage.setItem("fbw:mode:default", "1");
   w.localStorage.setItem(
@@ -257,6 +284,10 @@ const s4 = shadowOf(w4);
 assert.ok(
   s4.querySelector(".fbw-card").textContent.includes("1 replies"),
   "재부팅 후 시드 답글이 사라짐",
+);
+assert.ok(
+  s4.querySelector(".fbw-card").textContent.includes("시드 원본 수정본"),
+  "재부팅 후 시드 수정본이 사라짐",
 );
 
 // 13) 시드 삭제(숨김) — 확인 모달 후 목록에서 제거 + 영속화

@@ -1,21 +1,22 @@
-/* 스레드 CRUD + localStorage 영속화 — UI를 모른다 (단방향: UI가 store를 구독) */
+/* 스레드 CRUD + localStorage 영속화 — UI를 모른다 (단방향: UI가 store를 구독)
+   시드 override 계산은 seed-overrides.ts가 담당 */
 import { uid, type Comment, type CommentThread } from "./types";
 import { migrateV0 } from "./migrate";
+import {
+  applySeedOverrides,
+  seedEditPatch,
+  seedRemovePatch,
+  type SeedOverride,
+  type SeedOverrides,
+} from "./seed-overrides";
 
 const AUTHOR_KEY = "fbw:author";
-
-/* 시드 스레드는 파일이 원본 — 고객 행동(답글·완료·삭제)은 override로만 영속화 */
-export interface SeedOverride {
-  addedComments?: Comment[];
-  resolved?: boolean;
-  hidden?: boolean;
-}
 
 export class Store {
   private threads: CommentThread[] = [];
   private rawSeeds: CommentThread[] = []; // 시드 파일 원본 (override 미적용)
   private seedThreads: CommentThread[] = []; // override 적용본 (화면 표시용)
-  private overrides: Record<string, SeedOverride> = {};
+  private overrides: SeedOverrides = {};
   private listeners = new Set<() => void>();
   private _enabled = false;
 
@@ -66,23 +67,12 @@ export class Store {
   seed(items: CommentThread[]) {
     const localIds = new Set(this.threads.map((t) => t.id));
     this.rawSeeds = items.filter((t) => !localIds.has(t.id));
-    this.applySeedOverrides();
+    this.refreshSeeds();
     this.notify();
   }
 
-  private applySeedOverrides() {
-    this.seedThreads = this.rawSeeds
-      .filter((t) => !this.overrides[t.id]?.hidden)
-      .map((t) => {
-        const ov = this.overrides[t.id];
-        if (!ov) return { ...t, origin: "seed" as const };
-        return {
-          ...t,
-          origin: "seed" as const,
-          resolved: ov.resolved ?? t.resolved,
-          comments: [...t.comments, ...(ov.addedComments ?? [])],
-        };
-      });
+  private refreshSeeds() {
+    this.seedThreads = applySeedOverrides(this.rawSeeds, this.overrides);
   }
 
   addThread(t: CommentThread) {
@@ -109,25 +99,31 @@ export class Store {
     this.persist();
   }
 
-  /* 삭제 가능한 코멘트 = 고객이 이 브라우저에서 단 답글 (스레드 본문·시드 원본 제외) */
-  canRemoveComment(threadId: string, commentId: string): boolean {
+  /* 코멘트 수정 — 시드는 override로, 새 작성분은 제자리에서 */
+  updateComment(threadId: string, commentId: string, body: string) {
     if (this.isSeed(threadId)) {
-      return (this.overrides[threadId]?.addedComments ?? []).some((c) => c.id === commentId);
-    }
-    const t = this.threads.find((x) => x.id === threadId);
-    return !!t && t.comments.findIndex((c) => c.id === commentId) > 0;
-  }
-
-  removeComment(threadId: string, commentId: string) {
-    if (!this.canRemoveComment(threadId, commentId)) return;
-    if (this.isSeed(threadId)) {
-      const kept = (this.overrides[threadId]?.addedComments ?? []).filter((c) => c.id !== commentId);
-      this.overrideSeed(threadId, { addedComments: kept });
+      this.overrideSeed(threadId, seedEditPatch(this.overrides[threadId] ?? {}, commentId, body));
       return;
     }
     this.threads = this.threads.map((t) =>
-      t.id === threadId ? { ...t, comments: t.comments.filter((c) => c.id !== commentId) } : t,
+      t.id === threadId
+        ? { ...t, comments: t.comments.map((c) => (c.id === commentId ? { ...c, body } : c)) }
+        : t,
     );
+    this.persist();
+  }
+
+  /* 코멘트 삭제 — 마지막 코멘트를 지우면 스레드도 사라진다 */
+  removeComment(threadId: string, commentId: string) {
+    if (this.isSeed(threadId)) {
+      this.overrideSeed(threadId, seedRemovePatch(this.overrides[threadId] ?? {}, commentId));
+      return;
+    }
+    this.threads = this.threads
+      .map((t) =>
+        t.id === threadId ? { ...t, comments: t.comments.filter((c) => c.id !== commentId) } : t,
+      )
+      .filter((t) => t.comments.length > 0);
     this.persist();
   }
 
@@ -157,7 +153,7 @@ export class Store {
   private overrideSeed(id: string, patch: SeedOverride) {
     this.overrides[id] = { ...this.overrides[id], ...patch };
     localStorage.setItem(this.overridesKey, JSON.stringify(this.overrides));
-    this.applySeedOverrides();
+    this.refreshSeeds();
     this.notify();
   }
 
