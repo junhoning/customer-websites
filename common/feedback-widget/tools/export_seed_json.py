@@ -4,7 +4,12 @@
 출력:   clients/<고객폴더>/public/feedback-seed.json (위젯이 부팅 시 fetch)
 
 시드 변환 규칙 (기획서 §9 Q2): 유형·중요도는 버리고,
-진행 상태 "완료"만 resolved: true로 가져온다. 각 항목 = 코멘트 1개짜리 스레드."""
+진행 상태 "완료"만 resolved: true로 가져온다.
+
+같은 앵커(요소) = 한 스레드 (2026-07-16 결정): 같은 위치의 피드백들은
+하나의 스레드에 코멘트로 합친다. 합쳐진 스레드의 코멘트에는 엑셀 대조용
+"#번호" 접두어를 붙인다 (질문 Q1~Q7이 피드백 번호를 참조하므로).
+스레드 id는 첫 항목의 번호를 따른다 — override(답글·숨김) 키가 안정적이어야 해서."""
 import importlib.util
 import json
 import os
@@ -58,24 +63,31 @@ def find_anchor(location: str):
     return ANCHORS["기타"]
 
 
-def to_thread(n: int, row: tuple) -> dict:
-    location, _type, content, ref, _pri, status_full = row
-    page, selector, snippet = find_anchor(location)
-    # 위치 접두어는 넣지 않는다 — 위젯에서 클릭/hover로 위치가 표시되므로 중복
-    body = content + (f" — 참고: {ref}" if ref else "")
+def to_comment(n: int, row: tuple, numbered: bool) -> dict:
+    _loc, _type, content, ref, _pri, _status = row
+    # 위치 접두어는 넣지 않는다 — 위젯에서 클릭/hover로 위치가 표시되므로 중복.
+    # 합쳐진 스레드에서만 엑셀 번호(#n)를 남긴다
+    body = (f"#{n} " if numbered else "") + content + (f" — 참고: {ref}" if ref else "")
     return {
-        "id": f"seed-{n:02d}",
+        "id": f"seed-{n:02d}-c1",
+        "author": "고객 (기존 접수)",
+        "body": body,
+        "createdAt": RECEIVED_AT,
+    }
+
+
+def to_thread(members: list) -> dict:
+    """members: [(번호, row), ...] — 같은 앵커의 피드백 묶음 (첫 항목이 대표)"""
+    first_n, first_row = members[0]
+    page, selector, snippet = find_anchor(first_row[0])
+    numbered = len(members) > 1
+    return {
+        "id": f"seed-{first_n:02d}",
         "createdAt": RECEIVED_AT,
         "anchor": {"page": page, "selector": selector, "textSnippet": snippet, "scrollY": 0},
-        "resolved": status_full == "완료",
-        "comments": [
-            {
-                "id": f"seed-{n:02d}-c1",
-                "author": "고객 (기존 접수)",
-                "body": body,
-                "createdAt": RECEIVED_AT,
-            }
-        ],
+        # 묶음 전체가 완료여야 스레드 완료 — 하나라도 남았으면 핀을 유지한다
+        "resolved": all(row[5] == "완료" for _, row in members),
+        "comments": [to_comment(n, row, numbered) for n, row in members],
         "meta": {"userAgent": "", "viewport": ""},
         "origin": "seed",
     }
@@ -94,7 +106,12 @@ def main():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
-    threads = [to_thread(i, row) for i, row in enumerate(mod.FEEDBACK_ITEMS, start=1)]
+    # 같은 앵커끼리 묶는다 — 그룹 순서는 첫 등장 순서를 따른다
+    groups: dict = {}
+    for i, row in enumerate(mod.FEEDBACK_ITEMS, start=1):
+        key = find_anchor(row[0])
+        groups.setdefault(key, []).append((i, row))
+    threads = [to_thread(members) for members in groups.values()]
     payload = {
         "project": os.path.basename(os.path.normpath(client_dir)),
         "schemaVersion": SCHEMA_VERSION,
