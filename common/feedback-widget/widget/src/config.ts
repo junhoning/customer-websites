@@ -7,12 +7,6 @@ const SCRIPT =
 export const CONFIG = {
   project: SCRIPT?.dataset.project ?? "default",
   seedUrl: SCRIPT?.dataset.seed, // 기존 접수분 JSON (선택)
-  /* 현재 배포(커밋) 해시 — 코멘트마다 기록해 전후 비교의 기준점이 된다 */
+  /* 현재 배포(커밋) 해시 — 코멘트마다 기록 (버전 칩 표시, v1 리뷰 라운드의 재료) */
   version: SCRIPT?.dataset.version || undefined,
-  /* Before 서버 주소 — 기본: 접속한 호스트의 :3001 (compare-serve.sh 기본 포트) */
-  compareBase:
-    SCRIPT?.dataset.compareBase ??
-    `${location.protocol}//${location.hostname}:3001`,
-  /* iframe 임베드 모드 — UI 없이 postMessage 점프 수신부로만 동작 */
-  embed: new URLSearchParams(location.search).get("fbw") === "embed",
 } as const;

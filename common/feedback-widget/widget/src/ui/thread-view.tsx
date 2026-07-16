@@ -12,7 +12,6 @@ import {
   IconButton,
   TextButton,
   TextField,
-  useConfirm,
 } from "@ingradient/ui";
 import { CONFIG } from "../config";
 import { resolve } from "../anchor";
@@ -20,7 +19,6 @@ import { captureShot } from "../shot";
 import type { CommentThread } from "../types";
 import type { Store } from "../store";
 import { HeaderRow, HeaderTitle, Popover } from "./popover";
-import { CompareOverlay, isBeforeServerUp } from "./compare";
 import { AreaCompare } from "./area-compare";
 import { CommentRow } from "./comment-row";
 import { L } from "./labels";
@@ -42,36 +40,17 @@ export function ThreadView({
   number: number; // 목록 순번 (핀·사이드바와 동일)
   onClose: () => void;
 }) {
-  const confirm = useConfirm();
   const [body, setBody] = useState("");
   const [author, setAuthor] = useState(store.author);
-  /* 비교 기준(Before) — 기본은 최초 코멘트 시점, 칩 클릭으로 변경 */
-  const [baseline, setBaseline] = useState(thread.comments[0]?.version);
-  const [comparing, setComparing] = useState(false);
   const [areaShots, setAreaShots] = useState<{ before: string; after?: string } | null>(null);
   const el = thread.anchor.page === location.pathname ? resolve(thread.anchor) : null;
 
-  /* 기본: 영역 스크린샷 비교 (작성 순간 저장분 vs 지금 캡처).
-     스크린샷이 없는 스레드(기존 접수분 등)는 버전 기반 전체 화면 비교로 폴백 */
-  const canAreaCompare = !!thread.beforeShot;
+  /* 영역 스크린샷 비교 — 작성 순간 저장분(Before) vs 지금 즉석 캡처(After).
+     업계 표준(BugHerd·Marker.io) 방식 — 스크린샷 없는 스레드는 비활성 */
   const openCompare = async () => {
-    if (thread.beforeShot) {
-      const after = el ? await captureShot(el) : undefined;
-      setAreaShots({ before: thread.beforeShot, after });
-      return;
-    }
-    if (!baseline) return;
-    if (await isBeforeServerUp()) {
-      setComparing(true);
-      return;
-    }
-    // Before 서버가 꺼져 있음 — 깨진 화면 대신 안내
-    await confirm({
-      title: L.beforeServerDownTitle,
-      description: L.beforeServerDownHint,
-      confirmLabel: L.ok,
-      cancelLabel: L.close,
-    });
+    if (!thread.beforeShot) return;
+    const after = el ? await captureShot(el) : undefined;
+    setAreaShots({ before: thread.beforeShot, after });
   };
 
   const reply = () => {
@@ -103,8 +82,6 @@ export function ThreadView({
             thread={thread}
             comment={c}
             prevVersion={i > 0 ? thread.comments[i - 1].version : undefined}
-            baseline={baseline}
-            onSelectBaseline={setBaseline}
           />
         ))}
       </ThreadStack>
@@ -136,8 +113,8 @@ export function ThreadView({
         <TextButton
           tone="accent"
           iconLeading={<ExpandIcon size={14} />}
-          disabled={!canAreaCompare && !baseline}
-          title={canAreaCompare || baseline ? undefined : L.compareDisabledHint}
+          disabled={!thread.beforeShot}
+          title={thread.beforeShot ? undefined : L.compareDisabledHint}
           onClick={openCompare}
         >
           {L.compare}
@@ -149,13 +126,6 @@ export function ThreadView({
           before={areaShots.before}
           after={areaShots.after}
           onClose={() => setAreaShots(null)}
-        />
-      )}
-      {comparing && baseline && (
-        <CompareOverlay
-          beforeVersion={baseline}
-          anchor={thread.anchor}
-          onClose={() => setComparing(false)}
         />
       )}
     </Popover>

@@ -35,15 +35,11 @@ export function CommentRow({
   thread,
   comment,
   prevVersion,
-  baseline,
-  onSelectBaseline,
 }: {
   store: Store;
   thread: CommentThread;
   comment: Comment;
   prevVersion?: string; // 직전 코멘트의 버전 (칩 강조 판단)
-  baseline?: string; // 현재 비교 기준(Before)
-  onSelectBaseline: (version: string) => void;
 }) {
   const confirm = useConfirm();
   const [editing, setEditing] = useState(false);
@@ -98,8 +94,6 @@ export function CommentRow({
             <VersionChip
               version={comment.version}
               changed={prevVersion !== undefined && comment.version !== prevVersion}
-              active={comment.version === baseline}
-              onSelect={onSelectBaseline}
             />
           )}
           <IconButton

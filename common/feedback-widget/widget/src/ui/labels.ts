@@ -50,18 +50,13 @@ export const L = {
   downloadJson: "Download JSON",
   replies: "replies", // "· N replies"
 
-  /* 전후 비교 */
+  /* 전후 비교 (영역 스크린샷) */
   compare: "Compare",
-  compareDisabledHint: "Nothing to compare for this thread",
+  compareDisabledHint: "No screenshot was saved for this thread",
   before: "Before",
   after: "After",
-  current: "current",
   captureFailed: "Could not capture the current view",
-  beforeServerDownTitle: "Compare is not available right now",
-  beforeServerDownHint:
-    "The previous version of the site is not running. Please ask the site owner to start it, then try again.",
-  ok: "OK",
-  versionChipTitle: "Set as compare baseline (Before)",
+  versionChipTitle: "Site version when this was written",
 
   /* 기본 작성자 (이름 미입력 시) */
   defaultAuthor: "Guest",

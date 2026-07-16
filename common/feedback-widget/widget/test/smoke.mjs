@@ -372,56 +372,16 @@ assert.equal(
   "답글에 version 미기록",
 );
 
-// 16) Compare 오버레이 — Before(:3001)/After(현재) iframe이 embed URL로 뜬다
-assert.ok(!btnByText(s6, "Compare").disabled, "version 있는데 Compare 비활성");
-btnByText(s6, "Compare").click();
-await wait(60);
-const overlay = s6.querySelector(".fbw-compare");
-assert.ok(overlay, "비교 오버레이가 안 뜸");
+// 16) Compare — 스크린샷(beforeShot)이 없으면 비활성 (jsdom은 캔버스 미지원이라
+//     캡처가 조용히 실패 → 저장은 정상, 비교만 비활성이어야 한다)
 assert.equal(
-  overlay.querySelector(".fbw-compare-before").getAttribute("src"),
-  "http://localhost:3001/?fbw=embed",
-  "Before iframe URL 불일치",
+  JSON.parse(w6.localStorage.getItem("fbw:v2:default"))[0].beforeShot,
+  undefined,
+  "캔버스 없는 환경에서 스크린샷이 저장됨(?)",
 );
-assert.equal(
-  overlay.querySelector(".fbw-compare-after").getAttribute("src"),
-  "http://localhost/?fbw=embed",
-  "After iframe URL 불일치",
-);
-assert.ok(overlay.textContent.includes("aaa1111"), "헤더에 Before 버전 표기 없음");
-overlay.querySelector('button[aria-label="Close"]').click();
-await wait(60);
-assert.equal(s6.querySelector(".fbw-compare"), null, "오버레이가 안 닫힘");
+assert.ok(btnByText(s6, "Compare").disabled, "스크린샷 없는데 Compare가 활성");
 
-// 17) embed 모드 — URL 파라미터(?fbw=embed)로 부팅하면 UI 없이 점프 수신부만 동작
-const w8 = await (async () => {
-  const dom = new JSDOM(PAGE, {
-    url: "http://localhost/?fbw=embed",
-    runScripts: "outside-only",
-    pretendToBeVisual: true,
-  });
-  dom.window.scrollTo = () => {};
-  dom.window.sessionStorage.setItem("fbw:mode:default", "1"); // 모드가 켜져 있어도 UI가 없어야 한다
-  dom.window.eval(code);
-  await wait(120);
-  return dom.window;
-})();
-assert.equal(w8.document.getElementById("fbw-host"), null, "embed 모드인데 위젯 UI가 마운트됨");
-w8.dispatchEvent(
-  new w8.MessageEvent("message", {
-    data: {
-      type: "fbw:jump",
-      anchor: { page: "/", selector: "#title", textSnippet: "", scrollY: 0 },
-    },
-  }),
-);
-await wait(500); // flash는 스크롤 안착 후 350ms
-assert.ok(
-  w8.document.getElementById("title").style.outline.includes("3px solid"),
-  "embed 모드에서 fbw:jump 점프가 안 됨",
-);
-
-// 18) 같은 요소 = 같은 스레드 — 재우클릭 시 새 스레드 대신 기존 스레드가 열린다
+// 17) 같은 요소 = 같은 스레드 — 재우클릭 시 새 스레드 대신 기존 스레드가 열린다
 // (w6: #title에 스레드 1개가 이미 있음. 팝오버를 닫고 같은 요소를 다시 우클릭)
 s6.querySelector(".fbw-thread").parentElement.querySelector('button[aria-label="Close"]').click();
 await wait(60);
@@ -441,4 +401,4 @@ rightClick(w6, w6.document.querySelector("p"));
 await wait(60);
 assert.ok(s6.querySelector(".fbw-composer"), "다른 요소인데 새 작성 팝오버가 안 뜸");
 
-console.log(`✅ 스모크 테스트 통과 (번들 ${kb.toFixed(1)}KB, 18개 시나리오)`);
+console.log(`✅ 스모크 테스트 통과 (번들 ${kb.toFixed(1)}KB, 17개 시나리오)`);

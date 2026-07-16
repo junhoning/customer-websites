@@ -5,7 +5,6 @@ import tokensCss from "@ingradient/ui/tokens.css";
 import { CONFIG } from "./config";
 import { Store } from "./store";
 import { HOST_ID, consumePendingJump } from "./anchor";
-import { initEmbed } from "./embed";
 import { App } from "./ui/app";
 
 const Z_INDEX = 2147483000; // 고객사 어떤 요소보다 위
@@ -31,11 +30,6 @@ const baseCss = `
 `;
 
 function mount() {
-  if (CONFIG.embed) {
-    // 비교 뷰 iframe 안 — UI 없이 점프 수신부만 (전후비교-기획서 §2.3)
-    initEmbed();
-    return;
-  }
   if (document.getElementById(HOST_ID)) return; // 중복 주입 방지
 
   const host = document.createElement("div");
