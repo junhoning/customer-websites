@@ -3,6 +3,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import { CommentInput, ClosePanelIcon, IconButton, TextField } from "@ingradient/ui";
 import { CONFIG } from "../config";
+import { captureShot } from "../shot";
 import { uid, type Anchor, type CommentThread } from "../types";
 import type { Store } from "../store";
 import { HeaderRow, HeaderTitle, Popover } from "./popover";
@@ -34,12 +35,14 @@ export function Composer({
   const [body, setBody] = useState("");
   const [author, setAuthor] = useState(store.author);
 
-  const save = () => {
+  const save = async () => {
     const trimmed = body.trim();
     if (!trimmed) return;
     const name = author.trim() || L.defaultAuthor;
     store.author = name;
     const now = new Date().toISOString();
+    // 지금 이 순간의 대상 영역을 저장 — 나중에 "수정 전" 모습이 된다
+    const beforeShot = await captureShot(el);
     const thread: CommentThread = {
       id: uid(),
       createdAt: now,
@@ -52,6 +55,7 @@ export function Composer({
         userAgent: navigator.userAgent,
         viewport: `${window.innerWidth}x${window.innerHeight}`,
       },
+      beforeShot,
     };
     store.addThread(thread);
     onSaved(thread);

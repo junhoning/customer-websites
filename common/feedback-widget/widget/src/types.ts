@@ -25,6 +25,9 @@ export interface CommentThread {
   resolved: boolean; // 완료 처리 — 핀 숨김, 사이드바 "완료됨" 그룹으로
   comments: Comment[]; // [0] = 최초 코멘트 (스레드의 본문)
   meta: { userAgent: string; viewport: string };
+  /* 작성 순간의 대상 영역 스크린샷(JPEG dataURL) — 영역 전후 비교의 Before.
+     내보내기에서는 제외된다 (용량) */
+  beforeShot?: string;
   /* "seed" = 작업자가 미리 실어 보낸 기존 접수분 (파일이 원본, 변경은 override 영속화) */
   origin?: "seed";
 }

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ingradient/ui": "file:../vendor/ingradient-ui-0.0.1.tgz",
+    "html-to-image": "^1.11.13",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "styled-components": "^6.1.0"

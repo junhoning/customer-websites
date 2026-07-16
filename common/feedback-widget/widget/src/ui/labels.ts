@@ -52,10 +52,11 @@ export const L = {
 
   /* 전후 비교 */
   compare: "Compare",
-  compareDisabledHint: "No version recorded for this thread",
+  compareDisabledHint: "Nothing to compare for this thread",
   before: "Before",
   after: "After",
   current: "current",
+  captureFailed: "Could not capture the current view",
   versionChipTitle: "Set as compare baseline (Before)",
 
   /* 기본 작성자 (이름 미입력 시) */

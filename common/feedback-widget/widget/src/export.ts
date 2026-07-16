@@ -2,8 +2,10 @@
 import { SCHEMA_VERSION, type CommentThread } from "./types";
 
 export function serialize(project: string, threads: readonly CommentThread[]): string {
+  // 스크린샷(beforeShot)은 용량이 커서 회신 JSON에서 제외한다
+  const lean = threads.map(({ beforeShot: _shot, ...t }) => t);
   return JSON.stringify(
-    { project, schemaVersion: SCHEMA_VERSION, exportedAt: new Date().toISOString(), threads },
+    { project, schemaVersion: SCHEMA_VERSION, exportedAt: new Date().toISOString(), threads: lean },
     null,
     2,
   );

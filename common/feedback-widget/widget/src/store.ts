@@ -170,7 +170,13 @@ export class Store {
   }
 
   private persist() {
-    localStorage.setItem(this.threadsKey, JSON.stringify(this.threads));
+    try {
+      localStorage.setItem(this.threadsKey, JSON.stringify(this.threads));
+    } catch {
+      // 용량 초과(스크린샷 누적) — 스크린샷만 덜어내고 재시도
+      this.threads = this.threads.map(({ beforeShot: _shot, ...t }) => t);
+      localStorage.setItem(this.threadsKey, JSON.stringify(this.threads));
+    }
     this.notify();
   }
   private notify() {
