@@ -54,6 +54,9 @@ ANCHORS = {
 }
 
 RECEIVED_AT = "2026-07-15T00:00:00.000Z"  # 피드백 수령일
+# 고객이 피드백 당시 보고 있던 사이트의 커밋 — Compare의 Before 기준점.
+# d9b6e33: 초기 구축과 화면이 같은 첫 위젯 연동 커밋 (남색 테마, embed 동기 스크롤 가능)
+RECEIVED_VERSION = "d9b6e33"
 SCHEMA_VERSION = 2
 
 
@@ -71,6 +74,7 @@ def to_comment(n: int, row: tuple) -> dict:
         "author": "고객 (기존 접수)",
         "body": row[2],
         "createdAt": RECEIVED_AT,
+        "version": RECEIVED_VERSION,
     }
 
 
