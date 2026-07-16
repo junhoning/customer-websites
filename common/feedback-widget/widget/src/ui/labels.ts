@@ -52,7 +52,7 @@ export const L = {
 
   /* 전후 비교 (영역 스크린샷) */
   compare: "Compare",
-  compareDisabledHint: "No screenshot was saved for this thread",
+  compareThumbHint: "Click to compare before / after",
   before: "Before",
   after: "After",
   captureFailed: "Could not capture the current view",

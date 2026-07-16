@@ -340,8 +340,8 @@ assert.ok(
 const popover5 = s5.querySelector(".fbw-thread");
 assert.ok(popover5, "카드 클릭 시 스레드 팝오버가 안 열림");
 assert.ok(popover5.parentElement.textContent.includes("폴백 점프 테스트"), "팝오버 내용 불일치");
-// version 없는 스레드 — Compare 비활성
-assert.ok(btnByText(s5, "Compare").disabled, "version 없는 스레드인데 Compare가 활성");
+// 스크린샷 없는 스레드 — Compare 썸네일이 안 보인다
+assert.equal(s5.querySelector(".fbw-shot-thumb"), null, "스크린샷 없는데 썸네일이 보임");
 
 // 15) 버전 기록 — data-version이 최초 코멘트·답글에 기록되고 칩이 보인다
 const VERSION_PAGE = PAGE.replace(
@@ -372,14 +372,15 @@ assert.equal(
   "답글에 version 미기록",
 );
 
-// 16) Compare — 스크린샷(beforeShot)이 없으면 비활성 (jsdom은 캔버스 미지원이라
-//     캡처가 조용히 실패 → 저장은 정상, 비교만 비활성이어야 한다)
+// 16) Compare 진입 = 인라인 썸네일 — 스크린샷(beforeShot)이 없으면 아예 안 보인다
+//     (jsdom은 캔버스 미지원이라 캡처가 조용히 실패 → 저장은 정상, 썸네일만 없음)
 assert.equal(
   JSON.parse(w6.localStorage.getItem("fbw:v2:default"))[0].beforeShot,
   undefined,
   "캔버스 없는 환경에서 스크린샷이 저장됨(?)",
 );
-assert.ok(btnByText(s6, "Compare").disabled, "스크린샷 없는데 Compare가 활성");
+assert.equal(s6.querySelector(".fbw-shot-thumb"), null, "스크린샷 없는데 썸네일이 보임");
+assert.equal(btnByText(s6, "Compare"), undefined, "구식 Compare 버튼이 남아 있음");
 
 // 17) 같은 요소 = 같은 스레드 — 재우클릭 시 새 스레드 대신 기존 스레드가 열린다
 // (w6: #title에 스레드 1개가 이미 있음. 팝오버를 닫고 같은 요소를 다시 우클릭)
