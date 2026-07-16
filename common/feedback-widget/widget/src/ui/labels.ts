@@ -57,6 +57,10 @@ export const L = {
   after: "After",
   current: "current",
   captureFailed: "Could not capture the current view",
+  beforeServerDownTitle: "Compare is not available right now",
+  beforeServerDownHint:
+    "The previous version of the site is not running. Please ask the site owner to start it, then try again.",
+  ok: "OK",
   versionChipTitle: "Set as compare baseline (Before)",
 
   /* 기본 작성자 (이름 미입력 시) */

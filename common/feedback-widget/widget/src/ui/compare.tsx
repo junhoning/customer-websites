@@ -57,6 +57,21 @@ const Pane = styled.iframe`
 
 const embedUrl = (base: string, page: string) => `${base}${page}?fbw=embed`;
 
+/* Before 서버(:3001)가 살아 있는지 — 꺼져 있으면 깨진 iframe 대신 안내를 띄운다.
+   fetch가 없는 환경(테스트 등)에서는 확인을 생략하고 연다 */
+export async function isBeforeServerUp(): Promise<boolean> {
+  if (typeof fetch !== "function") return true;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 1500);
+    await fetch(`${CONFIG.compareBase}/`, { mode: "no-cors", signal: ctrl.signal });
+    clearTimeout(timer);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function CompareOverlay({
   beforeVersion,
   anchor,

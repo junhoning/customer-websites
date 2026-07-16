@@ -12,6 +12,7 @@ import {
   IconButton,
   TextButton,
   TextField,
+  useConfirm,
 } from "@ingradient/ui";
 import { CONFIG } from "../config";
 import { resolve } from "../anchor";
@@ -19,7 +20,7 @@ import { captureShot } from "../shot";
 import type { CommentThread } from "../types";
 import type { Store } from "../store";
 import { HeaderRow, HeaderTitle, Popover } from "./popover";
-import { CompareOverlay } from "./compare";
+import { CompareOverlay, isBeforeServerUp } from "./compare";
 import { AreaCompare } from "./area-compare";
 import { CommentRow } from "./comment-row";
 import { L } from "./labels";
@@ -41,6 +42,7 @@ export function ThreadView({
   number: number; // 목록 순번 (핀·사이드바와 동일)
   onClose: () => void;
 }) {
+  const confirm = useConfirm();
   const [body, setBody] = useState("");
   const [author, setAuthor] = useState(store.author);
   /* 비교 기준(Before) — 기본은 최초 코멘트 시점, 칩 클릭으로 변경 */
@@ -58,7 +60,18 @@ export function ThreadView({
       setAreaShots({ before: thread.beforeShot, after });
       return;
     }
-    if (baseline) setComparing(true);
+    if (!baseline) return;
+    if (await isBeforeServerUp()) {
+      setComparing(true);
+      return;
+    }
+    // Before 서버가 꺼져 있음 — 깨진 화면 대신 안내
+    await confirm({
+      title: L.beforeServerDownTitle,
+      description: L.beforeServerDownHint,
+      confirmLabel: L.ok,
+      cancelLabel: L.close,
+    });
   };
 
   const reply = () => {
