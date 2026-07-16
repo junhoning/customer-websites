@@ -23,11 +23,18 @@ const Photo = styled.div`
   align-items: center;
   justify-content: center;
   aspect-ratio: 4 / 5;
+  overflow: hidden;
   border: 1px solid ${({ theme }) => theme.color.line};
   border-radius: ${({ theme }) => theme.radius.card};
   background: ${({ theme }) => theme.color.primaryTint};
   color: ${({ theme }) => theme.color.muted};
   font-size: ${({ theme }) => theme.fontSize.sm};
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const RepName = styled.p`
@@ -77,8 +84,8 @@ export default function ProfileSection() {
     <Section>
       <SectionInner>
         <Grid>
-          <Photo role="img" aria-label={PROFILE.photoAlt}>
-            {PROFILE.photoPlaceholder}
+          <Photo>
+            <img src={PROFILE.photoSrc} alt={PROFILE.photoAlt} />
           </Photo>
           <div>
             <RepName>{SITE.representative}</RepName>

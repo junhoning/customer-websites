@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styled from "styled-components";
 import { media } from "@/styles/media";
-import { NAV_ITEMS, CTA_LINK } from "@/content/nav";
+import { NAV_ITEMS, CTA_LINK, HEADER_EXTRAS } from "@/content/nav";
 import { SITE } from "@/config/site";
 import MobileMenu from "@/components/layout/mobile-menu";
 import { ButtonLink } from "@/components/common/button";
@@ -82,6 +82,36 @@ const DesktopCta = styled(ButtonLink)`
   }
 `;
 
+/* LinkedIn·언어 전환 (피드백 #2) — 주소 확정 전까지 목업 링크 */
+const Extras = styled.div`
+  display: none;
+
+  ${media.md} {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+`;
+
+const ExtraLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 0.375rem;
+  border: 1px solid ${({ theme }) => theme.color.line};
+  border-radius: ${({ theme }) => theme.radius.pill};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: 700;
+  color: ${({ theme }) => theme.color.muted};
+
+  &:hover {
+    border-color: ${({ theme }) => theme.color.primaryHover};
+    color: ${({ theme }) => theme.color.primary};
+  }
+`;
+
 export default function Header() {
   const pathname = usePathname();
 
@@ -100,6 +130,21 @@ export default function Header() {
             </NavLink>
           ))}
         </Nav>
+
+        <Extras>
+          <ExtraLink
+            href={HEADER_EXTRAS.linkedin.href}
+            aria-label={HEADER_EXTRAS.linkedin.aria}
+            title={HEADER_EXTRAS.pendingTitle}
+          >
+            {HEADER_EXTRAS.linkedin.label}
+          </ExtraLink>
+          {HEADER_EXTRAS.languages.map((lang) => (
+            <ExtraLink key={lang.label} href={lang.href} title={HEADER_EXTRAS.pendingTitle}>
+              {lang.label}
+            </ExtraLink>
+          ))}
+        </Extras>
 
         <DesktopCta href={CTA_LINK.href} $variant="primary">
           {CTA_LINK.label}
