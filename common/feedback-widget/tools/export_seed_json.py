@@ -7,9 +7,10 @@
 진행 상태 "완료"만 resolved: true로 가져온다.
 
 같은 앵커(요소) = 한 스레드 (2026-07-16 결정): 같은 위치의 피드백들은
-하나의 스레드에 코멘트로 합친다. 합쳐진 스레드의 코멘트에는 엑셀 대조용
-"#번호" 접두어를 붙인다 (질문 Q1~Q7이 피드백 번호를 참조하므로).
-스레드 id는 첫 항목의 번호를 따른다 — override(답글·숨김) 키가 안정적이어야 해서."""
+하나의 스레드에 코멘트로 합친다. 코멘트 본문은 순수 텍스트만 —
+번호·참고 자료 접두어를 붙이지 않는다 (엑셀 번호 대조는 코멘트 id의
+seed-NN이 담당). 스레드 id는 첫 항목의 번호를 따른다 — override(답글·숨김)
+키가 안정적이어야 해서."""
 import importlib.util
 import json
 import os
@@ -63,15 +64,12 @@ def find_anchor(location: str):
     return ANCHORS["기타"]
 
 
-def to_comment(n: int, row: tuple, numbered: bool) -> dict:
-    _loc, _type, content, ref, _pri, _status = row
-    # 위치 접두어는 넣지 않는다 — 위젯에서 클릭/hover로 위치가 표시되므로 중복.
-    # 합쳐진 스레드에서만 엑셀 번호(#n)를 남긴다
-    body = (f"#{n} " if numbered else "") + content + (f" — 참고: {ref}" if ref else "")
+def to_comment(n: int, row: tuple) -> dict:
+    # 본문은 순수 텍스트만 — 위치는 클릭/hover로 표시되고, 참고 자료는 엑셀에 있다
     return {
         "id": f"seed-{n:02d}-c1",
         "author": "고객 (기존 접수)",
-        "body": body,
+        "body": row[2],
         "createdAt": RECEIVED_AT,
     }
 
@@ -80,14 +78,13 @@ def to_thread(members: list) -> dict:
     """members: [(번호, row), ...] — 같은 앵커의 피드백 묶음 (첫 항목이 대표)"""
     first_n, first_row = members[0]
     page, selector, snippet = find_anchor(first_row[0])
-    numbered = len(members) > 1
     return {
         "id": f"seed-{first_n:02d}",
         "createdAt": RECEIVED_AT,
         "anchor": {"page": page, "selector": selector, "textSnippet": snippet, "scrollY": 0},
         # 묶음 전체가 완료여야 스레드 완료 — 하나라도 남았으면 핀을 유지한다
         "resolved": all(row[5] == "완료" for _, row in members),
-        "comments": [to_comment(n, row, numbered) for n, row in members],
+        "comments": [to_comment(n, row) for n, row in members],
         "meta": {"userAgent": "", "viewport": ""},
         "origin": "seed",
     }
