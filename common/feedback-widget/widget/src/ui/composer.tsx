@@ -7,7 +7,7 @@ import { captureShot } from "../shot";
 import { uid, type Anchor, type Attachment, type CommentThread } from "../types";
 import type { Store } from "../store";
 import { HeaderRow, HeaderTitle, Popover } from "./popover";
-import { AttachInput } from "./attach-input";
+import { AttachButton, AttachChips } from "./attach-input";
 import { L } from "./labels";
 
 const TargetLine = styled.div`
@@ -88,13 +88,14 @@ export function Composer({
         value={author}
         onChange={(e) => setAuthor(e.target.value)}
       />
-      <AttachInput pending={attachments} onChange={setAttachments} />
+      <AttachChips pending={attachments} onChange={setAttachments} />
       <CommentInput
         value={body}
         onChange={setBody}
         onSubmit={save}
         placeholder={L.composerPlaceholder}
         submitLabel={L.post}
+        accessory={<AttachButton pending={attachments} onChange={setAttachments} />}
       />
     </Popover>
   );

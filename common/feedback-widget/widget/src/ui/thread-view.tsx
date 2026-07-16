@@ -18,7 +18,7 @@ import type { Attachment, CommentThread } from "../types";
 import type { Store } from "../store";
 import { HeaderRow, HeaderTitle, Popover } from "./popover";
 import { AreaCompare } from "./area-compare";
-import { AttachInput } from "./attach-input";
+import { AttachButton, AttachChips } from "./attach-input";
 import { CommentRow } from "./comment-row";
 import { L } from "./labels";
 
@@ -91,13 +91,14 @@ export function ThreadView({
           onChange={(e) => setAuthor(e.target.value)}
         />
       )}
-      <AttachInput pending={attachments} onChange={setAttachments} />
+      <AttachChips pending={attachments} onChange={setAttachments} />
       <CommentInput
         value={body}
         onChange={setBody}
         onSubmit={reply}
         placeholder={L.replyPlaceholder}
         submitLabel={L.reply}
+        accessory={<AttachButton pending={attachments} onChange={setAttachments} />}
       />
       <TextButton
         tone={thread.resolved ? "muted" : "accent"}

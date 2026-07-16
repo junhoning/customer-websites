@@ -1,12 +1,12 @@
-/* 첨부 파일 입력 — 업로드 버튼 + 보내기 전 대기 목록 칩. 이미지만 받는다 */
+/* 첨부 파일 입력 — 클립 버튼(CommentInput의 accessory 슬롯용) + 대기 목록 칩 */
 import { useRef } from "react";
 import styled from "styled-components";
-import { IconButton, TextButton, UploadIcon } from "@ingradient/ui";
+import { IconButton, PaperclipIcon, TextButton } from "@ingradient/ui";
 import { fileToAttachment } from "../attach";
 import type { Attachment } from "../types";
 import { L } from "./labels";
 
-const Row = styled.div`
+const ChipRow = styled.div`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -32,13 +32,13 @@ const Chip = styled.span`
   }
 `;
 
-export function AttachInput({
-  pending,
-  onChange,
-}: {
+interface AttachProps {
   pending: Attachment[];
   onChange: (next: Attachment[]) => void;
-}) {
+}
+
+/* 전송 버튼 왼쪽에 놓는 클립 버튼 — <CommentInput accessory={...}> 로 사용 */
+export function AttachButton({ pending, onChange }: AttachProps) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const pick = async (files: FileList | null) => {
@@ -51,7 +51,7 @@ export function AttachInput({
   };
 
   return (
-    <Row>
+    <>
       <input
         ref={fileRef}
         type="file"
@@ -68,8 +68,17 @@ export function AttachInput({
         title={L.attachHint}
         onClick={() => fileRef.current?.click()}
       >
-        <UploadIcon size={14} />
+        <PaperclipIcon size={14} />
       </IconButton>
+    </>
+  );
+}
+
+/* 보내기 전 첨부 대기 목록 — 입력창 위에 파일명 칩으로 표시 */
+export function AttachChips({ pending, onChange }: AttachProps) {
+  if (pending.length === 0) return null;
+  return (
+    <ChipRow>
       {pending.map((a, i) => (
         <Chip key={`${a.name}-${i}`}>
           <em>{a.name}</em>
@@ -83,6 +92,6 @@ export function AttachInput({
           </TextButton>
         </Chip>
       ))}
-    </Row>
+    </ChipRow>
   );
 }
