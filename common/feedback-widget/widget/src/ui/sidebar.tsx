@@ -13,6 +13,7 @@ import { download, copyToClipboard } from "../export";
 import type { Store } from "../store";
 import type { CommentThread } from "../types";
 import { ThreadCard } from "./thread-card";
+import { L } from "./labels";
 
 const SIDEBAR_W = 320;
 
@@ -98,7 +99,7 @@ export function Sidebar({
   };
 
   const copy = async () => {
-    setCopied((await copyToClipboard(store.project, store.exportList())) ? "복사됨!" : "복사 실패");
+    setCopied((await copyToClipboard(store.project, store.exportList())) ? L.copied : L.copyFailed);
     setTimeout(() => setCopied(null), 1500);
   };
 
@@ -110,25 +111,32 @@ export function Sidebar({
   return (
     <>
       <Tab className="fbw-sidetab" type="button" onClick={() => onOpenChange(!open)}>
-        코멘트 {list.length}
+        {L.tab} {list.length}
       </Tab>
       <Panel $open={open} className="fbw-sidebar">
         <DetailPanelSidebar
           headerSlot={
             <Head>
-              <span>코멘트 목록 ({list.length})</span>
-              <IconButton variant="ghost" size="sm" aria-label="닫기" onClick={() => onOpenChange(false)}>
+              <span>
+                {L.listTitle} ({list.length})
+              </span>
+              <IconButton
+                variant="ghost"
+                size="sm"
+                aria-label={L.close}
+                onClick={() => onOpenChange(false)}
+              >
                 <ClosePanelIcon size={16} />
               </IconButton>
             </Head>
           }
-          bodySectionTitle="진행 중"
+          bodySectionTitle={L.openSection}
           bodySlot={
             active.length === 0 ? (
               <Empty>
-                아직 코멘트가 없습니다.
+                {L.emptyLine1}
                 <br />
-                페이지 요소에 우클릭(모바일: 길게 누르기)해 보세요.
+                {L.emptyLine2}
               </Empty>
             ) : (
               cards(active)
@@ -138,21 +146,21 @@ export function Sidebar({
             resolved.length > 0 && (
               <>
                 <TextButton tone="muted" onClick={() => setShowResolved((v) => !v)}>
-                  완료됨 {resolved.length} {showResolved ? "접기" : "펼치기"}
+                  {showResolved ? L.hideArchived(resolved.length) : L.showArchived(resolved.length)}
                 </TextButton>
                 {showResolved && cards(resolved)}
               </>
             ),
             <ExportRow>
               <Button variant="secondary" size="sm" onClick={copy}>
-                {copied ?? "복사"}
+                {copied ?? L.copy}
               </Button>
               <Button
                 variant="solid"
                 size="sm"
                 onClick={() => download(store.project, store.exportList())}
               >
-                JSON 내려받기
+                {L.downloadJson}
               </Button>
             </ExportRow>,
           ]}

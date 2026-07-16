@@ -2,6 +2,7 @@
 import styled from "styled-components";
 import { NotificationBadge } from "@ingradient/ui";
 import type { Store } from "../store";
+import { L } from "./labels";
 
 const Btn = styled.button<{ $on: boolean }>`
   position: fixed;
@@ -51,7 +52,7 @@ export function Toggle({ store }: { store: Store }) {
         className="fbw-toggle"
         type="button"
         $on={store.enabled}
-        aria-label={store.enabled ? "코멘트 모드 끄기" : "코멘트 모드 켜기"}
+        aria-label={store.enabled ? L.toggleOff : L.toggleOn}
         onClick={() => store.setEnabled(!store.enabled)}
       >
         💬
@@ -61,9 +62,7 @@ export function Toggle({ store }: { store: Store }) {
           </BadgeSlot>
         )}
       </Btn>
-      <Label>
-        {store.enabled ? "코멘트 모드 켜짐 — 우클릭(길게 누르기)으로 작성" : "코멘트 모드 켜기"}
-      </Label>
+      <Label>{store.enabled ? L.toggleHintOn : L.toggleOn}</Label>
     </>
   );
 }

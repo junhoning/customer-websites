@@ -69,12 +69,12 @@ rightClick(w1, w1.document.getElementById("title"));
 await wait(60);
 assert.ok(s1.querySelector(".fbw-composer"), "작성 팝오버 없음");
 assert.ok(s1.querySelector(".fbw-selectbox"), "대상 하이라이트 박스 없음");
-assert.ok(btnByText(s1, "남기기").disabled, "빈 내용인데 남기기 버튼이 활성");
+assert.ok(btnByText(s1, "Post").disabled, "빈 내용인데 남기기 버튼이 활성");
 
 setValue(w1, s1.querySelector("textarea"), "제목 문구를 바꿔 주세요");
-setValue(w1, s1.querySelector('input[aria-label="작성자 이름"]'), "테스터");
+setValue(w1, s1.querySelector('input[aria-label="Author name"]'), "테스터");
 await wait(30);
-btnByText(s1, "남기기").click();
+btnByText(s1, "Post").click();
 await wait(60);
 
 const threads1 = JSON.parse(w1.localStorage.getItem("fbw:v2:default"));
@@ -93,27 +93,27 @@ assert.ok(s1.querySelector(".fbw-toggle").textContent.includes("1"), "배지 카
 // 7) 답글 — 대화가 쌓이고, 내 답글만 삭제 가능 (확인 모달: 취소/확인)
 setValue(w1, s1.querySelector(".fbw-thread").parentElement.querySelector("textarea"), "반영해 주셔서 감사합니다");
 await wait(30);
-btnByText(s1, "답글").click();
+btnByText(s1, "Reply").click();
 await wait(60);
 let t1 = JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0];
 assert.equal(t1.comments.length, 2, "답글이 저장되지 않음");
 assert.equal(t1.comments[1].body, "반영해 주셔서 감사합니다");
 
-const replyDel = s1.querySelector('button[aria-label="답글 삭제"]');
+const replyDel = s1.querySelector('button[aria-label="Delete reply"]');
 assert.ok(replyDel, "내 답글에 삭제 버튼이 없음");
 replyDel.click();
 await wait(60);
-assert.ok(btnByText(s1, "삭제"), "삭제 확인 모달이 안 뜸");
-btnByText(s1, "취소").click();
+assert.ok(btnByText(s1, "Delete"), "삭제 확인 모달이 안 뜸");
+btnByText(s1, "Cancel").click();
 await wait(60);
 assert.equal(
   JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0].comments.length,
   2,
   "취소했는데 답글이 삭제됨",
 );
-s1.querySelector('button[aria-label="답글 삭제"]').click();
+s1.querySelector('button[aria-label="Delete reply"]').click();
 await wait(60);
-btnByText(s1, "삭제").click();
+btnByText(s1, "Delete").click();
 await wait(60);
 assert.equal(
   JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0].comments.length,
@@ -122,7 +122,7 @@ assert.equal(
 );
 
 // 8) 완료 처리 — resolved 저장, 핀 걷힘, 사이드바 완료됨 그룹으로
-btnByText(s1, "완료 처리").click();
+btnByText(s1, "Archive").click();
 await wait(60);
 assert.equal(
   JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0].resolved,
@@ -131,8 +131,8 @@ assert.equal(
 );
 await wait(80); // 핀 재배치(rAF)
 assert.equal(s1.querySelectorAll(".fbw-pin").length, 0, "완료 스레드의 핀이 안 걷힘");
-assert.ok(btnByText(s1, "완료됨 1 펼치기"), "사이드바 완료됨 그룹 없음");
-btnByText(s1, "완료 취소").click();
+assert.ok(btnByText(s1, "Show archived (1)"), "사이드바 완료됨 그룹 없음");
+btnByText(s1, "Unarchive").click();
 await wait(60);
 assert.equal(
   JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0].resolved,
@@ -205,13 +205,13 @@ rightClick(w3, w3.document.getElementById("title"));
 await wait(60);
 setValue(w3, s3.querySelector("textarea"), "새로 작성한 코멘트");
 await wait(30);
-btnByText(s3, "남기기").click();
+btnByText(s3, "Post").click();
 await wait(60);
 assert.equal(s3.querySelectorAll(".fbw-card").length, 2, "시드+새 작성 목록 불일치");
 const nums = [...s3.querySelectorAll(".fbw-card")].map((c) => c.querySelector("span").textContent);
 assert.deepEqual(nums, ["1", "2"], "번호가 시드에 이어지지 않음");
 // 새 작성분 팝오버 닫기
-s3.querySelector(".fbw-thread").parentElement.querySelector('button[aria-label="닫기"]').click();
+s3.querySelector(".fbw-thread").parentElement.querySelector('button[aria-label="Close"]').click();
 await wait(60);
 
 // 11) 핀 — 같은 요소의 두 핀 전개, hover 하이라이트, click → 스레드 팝오버
@@ -223,7 +223,7 @@ pins[0].dispatchEvent(new w3.MouseEvent("mouseover", { bubbles: true }));
 await wait(60);
 const pinHover = s3.querySelector(".fbw-pin-hoverbox");
 assert.ok(pinHover, "핀 hover 시 영역 하이라이트 없음");
-assert.equal(pinHover.getAttribute("data-label"), "코멘트 1", "hover 라벨 불일치");
+assert.equal(pinHover.getAttribute("data-label"), "Comment 1", "hover 라벨 불일치");
 pins[0].dispatchEvent(new w3.MouseEvent("mouseout", { bubbles: true }));
 await wait(60);
 assert.equal(s3.querySelector(".fbw-pin-hoverbox"), null, "hover 해제 후 하이라이트 잔존");
@@ -231,14 +231,14 @@ pins[0].click();
 await wait(60);
 assert.ok(s3.querySelector(".fbw-thread"), "핀 클릭 시 스레드 팝오버가 안 열림");
 assert.ok(
-  s3.querySelector(".fbw-thread").textContent.includes("코멘트 1"),
+  s3.querySelector(".fbw-thread").textContent.includes("Comment 1"),
   "다른 스레드가 열림",
 );
 
 // 12) 시드에 답글 → override 영속화, 재부팅 후에도 유지
 setValue(w3, s3.querySelector(".fbw-thread").parentElement.querySelector("textarea"), "시드에 단 답글");
 await wait(30);
-btnByText(s3, "답글").click();
+btnByText(s3, "Reply").click();
 await wait(60);
 const ov3 = JSON.parse(w3.localStorage.getItem("fbw:v2:overrides:default"));
 assert.equal(ov3["seed-01"].addedComments.length, 1, "시드 답글이 override로 영속화 안 됨");
@@ -254,14 +254,14 @@ const w4 = await boot((w) => {
 }, SEED_PAGE);
 const s4 = shadowOf(w4);
 assert.ok(
-  s4.querySelector(".fbw-card").textContent.includes("답글 1"),
+  s4.querySelector(".fbw-card").textContent.includes("1 replies"),
   "재부팅 후 시드 답글이 사라짐",
 );
 
 // 13) 시드 삭제(숨김) — 확인 모달 후 목록에서 제거 + 영속화
-s4.querySelector('.fbw-card button[aria-label="스레드 삭제"]').click();
+s4.querySelector('.fbw-card button[aria-label="Delete thread"]').click();
 await wait(60);
-btnByText(s4, "삭제").click();
+btnByText(s4, "Delete").click();
 await wait(60);
 assert.equal(s4.querySelectorAll(".fbw-card").length, 0, "시드 삭제(숨김) 미반영");
 const ov4 = JSON.parse(w4.localStorage.getItem("fbw:v2:overrides:default"));

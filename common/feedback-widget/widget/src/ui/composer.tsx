@@ -5,6 +5,7 @@ import { CommentInput, ClosePanelIcon, IconButton, TextField } from "@ingradient
 import { uid, type Anchor, type CommentThread } from "../types";
 import type { Store } from "../store";
 import { HeaderRow, HeaderTitle, Popover } from "./popover";
+import { L } from "./labels";
 
 const TargetLine = styled.div`
   font-size: var(--ig-font-size-2xs);
@@ -35,7 +36,7 @@ export function Composer({
   const save = () => {
     const trimmed = body.trim();
     if (!trimmed) return;
-    const name = author.trim() || "고객";
+    const name = author.trim() || L.defaultAuthor;
     store.author = name;
     const now = new Date().toISOString();
     const thread: CommentThread = {
@@ -56,16 +57,18 @@ export function Composer({
   return (
     <Popover targetEl={el} point={point}>
       <HeaderRow className="fbw-composer">
-        <HeaderTitle>코멘트 작성</HeaderTitle>
-        <IconButton variant="ghost" size="sm" aria-label="닫기" onClick={onClose}>
+        <HeaderTitle>{L.composerTitle}</HeaderTitle>
+        <IconButton variant="ghost" size="sm" aria-label={L.close} onClick={onClose}>
           <ClosePanelIcon size={16} />
         </IconButton>
       </HeaderRow>
-      <TargetLine>대상: {anchor.textSnippet || anchor.selector}</TargetLine>
+      <TargetLine>
+        {L.composerTarget}: {anchor.textSnippet || anchor.selector}
+      </TargetLine>
       <TextField
         size="sm"
-        placeholder="이름 (기억됩니다)"
-        aria-label="작성자 이름"
+        placeholder={L.namePlaceholder}
+        aria-label={L.nameAria}
         value={author}
         onChange={(e) => setAuthor(e.target.value)}
       />
@@ -73,8 +76,8 @@ export function Composer({
         value={body}
         onChange={setBody}
         onSubmit={save}
-        placeholder="이 위치에 대해 하고 싶은 말을 남겨 주세요"
-        submitLabel="남기기"
+        placeholder={L.composerPlaceholder}
+        submitLabel={L.post}
       />
     </Popover>
   );

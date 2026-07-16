@@ -17,9 +17,10 @@ import { resolve } from "../anchor";
 import { threadBody, type Comment, type CommentThread } from "../types";
 import type { Store } from "../store";
 import { HeaderRow, HeaderTitle, Popover } from "./popover";
+import { L } from "./labels";
 
 const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleDateString("ko-KR", { month: "numeric", day: "numeric" });
+  new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
 export function ThreadView({
   store,
@@ -40,7 +41,7 @@ export function ThreadView({
   const reply = () => {
     const trimmed = body.trim();
     if (!trimmed) return;
-    const name = author.trim() || "고객";
+    const name = author.trim() || L.defaultAuthor;
     store.author = name;
     store.addComment(thread.id, name, trimmed);
     setBody("");
@@ -48,10 +49,10 @@ export function ThreadView({
 
   const removeThread = async () => {
     const ok = await confirm({
-      title: "이 코멘트 스레드를 삭제할까요?",
+      title: L.deleteThreadTitle,
       description: threadBody(thread),
-      confirmLabel: "삭제",
-      cancelLabel: "취소",
+      confirmLabel: L.delete,
+      cancelLabel: L.cancel,
       danger: true,
     });
     if (!ok) return;
@@ -61,10 +62,10 @@ export function ThreadView({
 
   const removeComment = async (c: Comment) => {
     const ok = await confirm({
-      title: "이 답글을 삭제할까요?",
+      title: L.deleteReplyTitle,
       description: c.body,
-      confirmLabel: "삭제",
-      cancelLabel: "취소",
+      confirmLabel: L.delete,
+      cancelLabel: L.cancel,
       danger: true,
     });
     if (ok) store.removeComment(thread.id, c.id);
@@ -73,18 +74,20 @@ export function ThreadView({
   return (
     <Popover targetEl={el}>
       <HeaderRow className="fbw-thread">
-        <HeaderTitle>코멘트 {number}</HeaderTitle>
-        {thread.resolved && <Badge $tone="success">완료됨</Badge>}
+        <HeaderTitle>
+          {L.thread} {number}
+        </HeaderTitle>
+        {thread.resolved && <Badge $tone="success">{L.archivedBadge}</Badge>}
         <IconButton
           variant="ghost"
           size="sm"
           tone="danger"
-          aria-label="스레드 삭제"
+          aria-label={L.deleteThreadAria}
           onClick={removeThread}
         >
           <TrashIcon size={16} />
         </IconButton>
-        <IconButton variant="ghost" size="sm" aria-label="닫기" onClick={onClose}>
+        <IconButton variant="ghost" size="sm" aria-label={L.close} onClick={onClose}>
           <ClosePanelIcon size={16} />
         </IconButton>
       </HeaderRow>
@@ -102,7 +105,7 @@ export function ThreadView({
                   variant="ghost"
                   size="sm"
                   tone="danger"
-                  aria-label="답글 삭제"
+                  aria-label={L.deleteReplyAria}
                   onClick={() => removeComment(c)}
                 >
                   <TrashIcon size={14} />
@@ -116,8 +119,8 @@ export function ThreadView({
       {!store.author && (
         <TextField
           size="sm"
-          placeholder="이름 (기억됩니다)"
-          aria-label="작성자 이름"
+          placeholder={L.namePlaceholder}
+          aria-label={L.nameAria}
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
         />
@@ -126,15 +129,15 @@ export function ThreadView({
         value={body}
         onChange={setBody}
         onSubmit={reply}
-        placeholder="답글을 남겨 주세요"
-        submitLabel="답글"
+        placeholder={L.replyPlaceholder}
+        submitLabel={L.reply}
       />
       <TextButton
         tone={thread.resolved ? "muted" : "accent"}
         iconLeading={<CheckIcon size={14} />}
         onClick={() => store.setResolved(thread.id, !thread.resolved)}
       >
-        {thread.resolved ? "완료 취소" : "완료 처리"}
+        {thread.resolved ? L.unarchive : L.archive}
       </TextButton>
     </Popover>
   );

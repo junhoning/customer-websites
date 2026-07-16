@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Badge, Card, IconButton, TrashIcon, useConfirm } from "@ingradient/ui";
 import { threadAuthor, threadBody, type CommentThread } from "../types";
 import type { Store } from "../store";
+import { L } from "./labels";
 
 const TopRow = styled.div`
   display: flex;
@@ -61,10 +62,10 @@ export function ThreadCard({
   const remove = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const ok = await confirm({
-      title: "이 코멘트 스레드를 삭제할까요?",
+      title: L.deleteThreadTitle,
       description: threadBody(thread),
-      confirmLabel: "삭제",
-      cancelLabel: "취소",
+      confirmLabel: L.delete,
+      cancelLabel: L.cancel,
       danger: true,
     });
     if (ok) store.removeThread(thread.id);
@@ -82,16 +83,22 @@ export function ThreadCard({
       <TopRow>
         <Num>{number}</Num>
         <span>{threadAuthor(thread)}</span>
-        {thread.resolved && <Badge $tone="success">완료</Badge>}
+        {thread.resolved && <Badge $tone="success">{L.archivedBadge}</Badge>}
         <Spacer />
-        <IconButton variant="ghost" size="sm" tone="danger" aria-label="스레드 삭제" onClick={remove}>
+        <IconButton
+          variant="ghost"
+          size="sm"
+          tone="danger"
+          aria-label={L.deleteThreadAria}
+          onClick={remove}
+        >
           <TrashIcon size={14} />
         </IconButton>
       </TopRow>
       <Body>{threadBody(thread)}</Body>
       <MetaLine>
         {thread.anchor.page}
-        {replies > 0 && ` · 답글 ${replies}`}
+        {replies > 0 && ` · ${replies} ${L.replies}`}
       </MetaLine>
     </Card>
   );

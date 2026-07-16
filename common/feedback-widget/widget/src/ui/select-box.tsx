@@ -10,7 +10,7 @@ const Box = styled.div`
   border-radius: var(--ig-radius-sm);
 
   &::after {
-    content: "코멘트 대상";
+    content: "Comment target";
     position: absolute;
     top: -22px;
     left: -2px;

@@ -6,6 +6,7 @@ import { resolve } from "../anchor";
 import { threadBody } from "../types";
 import type { Store } from "../store";
 import { useViewportTick } from "./hooks";
+import { L } from "./labels";
 
 const PIN_AMBER = "#f59e0b"; // 어떤 사이트 위에서도 눈에 띄는 고정 마커색
 
@@ -93,7 +94,7 @@ export function Pins({ store, onPinClick }: { store: Store; onPinClick: (id: str
         title={threadBody(thread)}
         style={{ left, top }}
         onMouseEnter={() =>
-          setHover({ rect: el.getBoundingClientRect(), label: `코멘트 ${index + 1}` })
+          setHover({ rect: el.getBoundingClientRect(), label: `${L.thread} ${index + 1}` })
         }
         onMouseLeave={() => setHover(null)}
         onClick={() => onPinClick(thread.id)}
