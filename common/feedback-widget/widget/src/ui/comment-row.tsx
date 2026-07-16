@@ -14,6 +14,7 @@ import {
 import type { Comment, CommentThread } from "../types";
 import type { Store } from "../store";
 import { VersionChip } from "./version-chip";
+import { AttachmentList } from "./attachment-list";
 import { L } from "./labels";
 
 const Actions = styled.span`
@@ -129,6 +130,9 @@ export function CommentRow({
       body={
         <>
           {comment.body}
+          {comment.attachments && comment.attachments.length > 0 && (
+            <AttachmentList attachments={comment.attachments} />
+          )}
           {comment.shot && (
             <ShotThumb
               type="button"

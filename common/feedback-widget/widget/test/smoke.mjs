@@ -382,7 +382,28 @@ assert.equal(
 assert.equal(s6.querySelector(".fbw-shot-thumb"), null, "스크린샷 없는데 썸네일이 보임");
 assert.equal(btnByText(s6, "Compare"), undefined, "구식 Compare 버튼이 남아 있음");
 
-// 17) 같은 요소 = 같은 스레드 — 재우클릭 시 새 스레드 대신 기존 스레드가 열린다
+// 17) 첨부 파일 — 답글에 이미지를 붙이면 저장·표시되고 내보내기에 포함된다
+const fileInput = s6.querySelector('input[type="file"]');
+assert.ok(fileInput, "첨부 입력이 없음");
+Object.defineProperty(fileInput, "files", {
+  value: [new w6.File(["fake-image-bytes"], "logo.png", { type: "image/png" })],
+});
+fileInput.dispatchEvent(new w6.Event("change", { bubbles: true }));
+await wait(120); // FileReader 비동기
+assert.ok(
+  [...s6.querySelectorAll("em")].some((e) => e.textContent === "logo.png"),
+  "첨부 대기 칩이 안 보임",
+);
+setValue(w6, s6.querySelector(".fbw-thread").parentElement.querySelector("textarea"), "로고 첨부합니다");
+await wait(30);
+btnByText(s6, "Reply").click();
+await wait(120);
+const attached = JSON.parse(w6.localStorage.getItem("fbw:v2:default"))[0].comments.at(-1);
+assert.equal(attached.attachments?.[0]?.name, "logo.png", "첨부가 저장되지 않음");
+assert.ok(attached.attachments[0].dataUrl.startsWith("data:image/png"), "dataURL 형식 아님");
+assert.ok(s6.querySelector(".fbw-attachments img"), "코멘트에 첨부 썸네일이 안 보임");
+
+// 18) 같은 요소 = 같은 스레드 — 재우클릭 시 새 스레드 대신 기존 스레드가 열린다
 // (w6: #title에 스레드 1개가 이미 있음. 팝오버를 닫고 같은 요소를 다시 우클릭)
 s6.querySelector(".fbw-thread").parentElement.querySelector('button[aria-label="Close"]').click();
 await wait(60);
@@ -402,4 +423,4 @@ rightClick(w6, w6.document.querySelector("p"));
 await wait(60);
 assert.ok(s6.querySelector(".fbw-composer"), "다른 요소인데 새 작성 팝오버가 안 뜸");
 
-console.log(`✅ 스모크 테스트 통과 (번들 ${kb.toFixed(1)}KB, 17개 시나리오)`);
+console.log(`✅ 스모크 테스트 통과 (번들 ${kb.toFixed(1)}KB, 18개 시나리오)`);

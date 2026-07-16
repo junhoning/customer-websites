@@ -8,6 +8,7 @@
 - 유형·중요도는 빈 값 — 필요하면 작업자가 엑셀에서 수동 지정
 - resolved → 진행 상태 "완료", 아니면 "대기"
 """
+import base64
 import json
 import os
 import re
@@ -30,7 +31,26 @@ def flatten(thread: dict) -> str:
     return body
 
 
-def to_tuple(thread: dict) -> tuple:
+def save_attachments(thread: dict, client_dir: str) -> list:
+    """코멘트 첨부(dataURL)를 feedback/attachments/에 파일로 풀어 저장 — 작업자가 바로 쓴다"""
+    tid = thread.get("id", "")[:8]
+    outdir = os.path.join(client_dir, "feedback", "attachments")
+    saved = []
+    for c in thread.get("comments", []):
+        for att in c.get("attachments") or []:
+            m = re.match(r"data:[\w/+.-]+;base64,(.*)", att.get("dataUrl", ""), re.S)
+            if not m:
+                continue
+            safe = re.sub(r"[^\w.\-가-힣]", "_", att.get("name", "file"))
+            os.makedirs(outdir, exist_ok=True)
+            fname = f"{tid}-{safe}"
+            with open(os.path.join(outdir, fname), "wb") as f:
+                f.write(base64.b64decode(m.group(1)))
+            saved.append(fname)
+    return saved
+
+
+def to_tuple(thread: dict, attachments: list) -> tuple:
     anchor = thread.get("anchor", {})
     meta = thread.get("meta", {})
     ref = (
@@ -38,6 +58,8 @@ def to_tuple(thread: dict) -> tuple:
         f" · {anchor.get('selector', '?')}"
         f" · {meta.get('viewport', '')}"
     )
+    if attachments:
+        ref += f" · 첨부: {', '.join(attachments)}"
     status = "완료" if thread.get("resolved") else "대기"
     # 열 순서: 위치, 유형(빈 값), 내용, 참고, 중요도(빈 값), 진행 상태
     return (LOCATION, "", flatten(thread), ref, "", status)
@@ -78,7 +100,7 @@ def main():
     marker = "FEEDBACK_ITEMS = ["
     start = src.index(marker)
     end = src.index("\n]", start)
-    block = "".join(fmt(to_tuple(t)) for t in fresh)
+    block = "".join(fmt(to_tuple(t, save_attachments(t, client_dir))) for t in fresh)
     new_src = src[: end + 1] + block.rstrip("\n") + src[end + 1 :]
 
     open(data_path, "w", encoding="utf-8").write(new_src)

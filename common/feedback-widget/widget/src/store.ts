@@ -1,6 +1,6 @@
 /* 스레드 CRUD + localStorage 영속화 — UI를 모른다 (단방향: UI가 store를 구독)
    시드 override 계산은 seed-overrides.ts가 담당 */
-import { uid, type Comment, type CommentThread } from "./types";
+import { uid, type Attachment, type Comment, type CommentThread } from "./types";
 import { liftLegacyShots, migrateV0 } from "./migrate";
 import {
   applySeedOverrides,
@@ -80,7 +80,14 @@ export class Store {
     this.persist();
   }
 
-  addComment(threadId: string, author: string, body: string, version?: string, shot?: string) {
+  addComment(
+    threadId: string,
+    author: string,
+    body: string,
+    version?: string,
+    shot?: string,
+    attachments?: Attachment[],
+  ) {
     const comment: Comment = {
       id: uid(),
       author,
@@ -88,6 +95,7 @@ export class Store {
       createdAt: new Date().toISOString(),
       version,
       shot,
+      attachments: attachments?.length ? attachments : undefined,
     };
     if (this.isSeed(threadId)) {
       const ov = this.overrides[threadId] ?? {};
@@ -174,12 +182,20 @@ export class Store {
     try {
       localStorage.setItem(this.threadsKey, JSON.stringify(this.threads));
     } catch {
-      // 용량 초과(스크린샷 누적) — 스크린샷만 덜어내고 재시도
+      // 용량 초과 — 스크린샷부터 덜어내고, 그래도 안 되면 첨부까지 (코멘트는 보존)
       this.threads = this.threads.map((t) => ({
         ...t,
         comments: t.comments.map(({ shot: _shot, ...c }) => c),
       }));
-      localStorage.setItem(this.threadsKey, JSON.stringify(this.threads));
+      try {
+        localStorage.setItem(this.threadsKey, JSON.stringify(this.threads));
+      } catch {
+        this.threads = this.threads.map((t) => ({
+          ...t,
+          comments: t.comments.map(({ attachments: _att, ...c }) => c),
+        }));
+        localStorage.setItem(this.threadsKey, JSON.stringify(this.threads));
+      }
     }
     this.notify();
   }

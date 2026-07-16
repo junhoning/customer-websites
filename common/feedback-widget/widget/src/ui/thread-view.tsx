@@ -14,10 +14,11 @@ import {
 import { CONFIG } from "../config";
 import { resolve } from "../anchor";
 import { captureShot } from "../shot";
-import type { CommentThread } from "../types";
+import type { Attachment, CommentThread } from "../types";
 import type { Store } from "../store";
 import { HeaderRow, HeaderTitle, Popover } from "./popover";
 import { AreaCompare } from "./area-compare";
+import { AttachInput } from "./attach-input";
 import { CommentRow } from "./comment-row";
 import { L } from "./labels";
 
@@ -34,6 +35,7 @@ export function ThreadView({
 }) {
   const [body, setBody] = useState("");
   const [author, setAuthor] = useState(store.author);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [areaShots, setAreaShots] = useState<{ before: string; after?: string } | null>(null);
   const el = thread.anchor.page === location.pathname ? resolve(thread.anchor) : null;
 
@@ -50,8 +52,9 @@ export function ThreadView({
     store.author = name;
     // 답글에도 그 시점 모습을 남긴다 — 스레드가 시각적 타임라인이 된다
     const shot = el ? await captureShot(el) : undefined;
-    store.addComment(thread.id, name, trimmed, CONFIG.version, shot);
+    store.addComment(thread.id, name, trimmed, CONFIG.version, shot, attachments);
     setBody("");
+    setAttachments([]);
   };
 
   return (
@@ -88,6 +91,7 @@ export function ThreadView({
           onChange={(e) => setAuthor(e.target.value)}
         />
       )}
+      <AttachInput pending={attachments} onChange={setAttachments} />
       <CommentInput
         value={body}
         onChange={setBody}

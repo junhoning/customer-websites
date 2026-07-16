@@ -9,6 +9,12 @@ export interface Anchor {
   scrollY: number; // 최후 폴백
 }
 
+/* 고객이 코멘트에 올리는 파일(이미지) — 회신 JSON에 포함되어 작업자에게 전달된다 */
+export interface Attachment {
+  name: string;
+  dataUrl: string;
+}
+
 export interface Comment {
   id: string;
   author: string;
@@ -19,6 +25,8 @@ export interface Comment {
   /* 작성 순간의 대상 영역 스크린샷(JPEG dataURL) — 코멘트마다 그 시점 모습이 남아
      스레드가 시각적 타임라인이 된다. 내보내기에서는 제외 (용량) */
   shot?: string;
+  /* 첨부 파일 — 스크린샷과 달리 콘텐츠이므로 내보내기에 포함된다 */
+  attachments?: Attachment[];
 }
 
 export interface CommentThread {

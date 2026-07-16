@@ -58,6 +58,11 @@ export const L = {
   captureFailed: "Could not capture the current view",
   zoomHint: "Click to enlarge",
   zoomBack: "Back to side-by-side",
+
+  /* 첨부 */
+  attachAria: "Attach images",
+  attachHint: "Attach images (logo, photo, reference…)",
+  removeAttachment: "Remove attachment",
   versionChipTitle: "Site version when this was written",
 
   /* 기본 작성자 (이름 미입력 시) */

@@ -4,9 +4,10 @@ import styled from "styled-components";
 import { CommentInput, ClosePanelIcon, IconButton, TextField } from "@ingradient/ui";
 import { CONFIG } from "../config";
 import { captureShot } from "../shot";
-import { uid, type Anchor, type CommentThread } from "../types";
+import { uid, type Anchor, type Attachment, type CommentThread } from "../types";
 import type { Store } from "../store";
 import { HeaderRow, HeaderTitle, Popover } from "./popover";
+import { AttachInput } from "./attach-input";
 import { L } from "./labels";
 
 const TargetLine = styled.div`
@@ -34,6 +35,7 @@ export function Composer({
 }) {
   const [body, setBody] = useState("");
   const [author, setAuthor] = useState(store.author);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   const save = async () => {
     const trimmed = body.trim();
@@ -49,7 +51,15 @@ export function Composer({
       anchor,
       resolved: false,
       comments: [
-        { id: uid(), author: name, body: trimmed, createdAt: now, version: CONFIG.version, shot },
+        {
+          id: uid(),
+          author: name,
+          body: trimmed,
+          createdAt: now,
+          version: CONFIG.version,
+          shot,
+          attachments: attachments.length ? attachments : undefined,
+        },
       ],
       meta: {
         userAgent: navigator.userAgent,
@@ -78,6 +88,7 @@ export function Composer({
         value={author}
         onChange={(e) => setAuthor(e.target.value)}
       />
+      <AttachInput pending={attachments} onChange={setAttachments} />
       <CommentInput
         value={body}
         onChange={setBody}
