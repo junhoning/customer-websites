@@ -44,9 +44,21 @@ export function App({ store }: { store: Store }) {
       {enabled && (
         <Capture
           active={!open}
-          onPick={(el, x, y) =>
-            setOpen({ kind: "draft", el, anchor: capture(el), point: { x, y } })
-          }
+          onPick={(el, x, y) => {
+            /* 같은 요소 = 같은 스레드 — 이미 대화가 열려 있는 요소면 새 스레드 대신
+               그 스레드에 답글을 달게 한다 (Archive된 것은 종결 — 새 스레드 시작) */
+            const existing = store
+              .list()
+              .find(
+                (t) =>
+                  !t.resolved && t.anchor.page === location.pathname && resolve(t.anchor) === el,
+              );
+            if (existing) {
+              setOpen({ kind: "thread", id: existing.id });
+              return;
+            }
+            setOpen({ kind: "draft", el, anchor: capture(el), point: { x, y } });
+          }}
         />
       )}
       {enabled && <Pins store={store} onPinClick={(id) => setOpen({ kind: "thread", id })} />}
