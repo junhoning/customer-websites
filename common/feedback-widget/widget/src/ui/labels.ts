@@ -56,6 +56,8 @@ export const L = {
   before: "Before",
   after: "After",
   captureFailed: "Could not capture the current view",
+  zoomHint: "Click to enlarge",
+  zoomBack: "Back to side-by-side",
   versionChipTitle: "Site version when this was written",
 
   /* 기본 작성자 (이름 미입력 시) */
