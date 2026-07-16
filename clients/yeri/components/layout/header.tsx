@@ -7,6 +7,7 @@ import { media } from "@/styles/media";
 import { NAV_ITEMS, CTA_LINK, HEADER_EXTRAS } from "@/content/nav";
 import { SITE } from "@/config/site";
 import MobileMenu from "@/components/layout/mobile-menu";
+import LangMenu from "@/components/layout/lang-menu";
 import { ButtonLink } from "@/components/common/button";
 
 /* 스티키 헤더의 레이아웃 — 모바일 메뉴의 상태는 MobileMenu가 소유 */
@@ -139,11 +140,7 @@ export default function Header() {
           >
             {HEADER_EXTRAS.linkedin.label}
           </ExtraLink>
-          {HEADER_EXTRAS.languages.map((lang) => (
-            <ExtraLink key={lang.label} href={lang.href} title={HEADER_EXTRAS.pendingTitle}>
-              {lang.label}
-            </ExtraLink>
-          ))}
+          <LangMenu />
         </Extras>
 
         <DesktopCta href={CTA_LINK.href} $variant="primary">
