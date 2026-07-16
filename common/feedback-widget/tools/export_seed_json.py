@@ -11,6 +11,7 @@
 번호·참고 자료 접두어를 붙이지 않는다 (엑셀 번호 대조는 코멘트 id의
 seed-NN이 담당). 스레드 id는 첫 항목의 번호를 따른다 — override(답글·숨김)
 키가 안정적이어야 해서."""
+import base64
 import importlib.util
 import json
 import os
@@ -93,6 +94,16 @@ def to_thread(members: list) -> dict:
     }
 
 
+def attach_shot(thread: dict, client_dir: str):
+    """feedback/shots/<스레드id>.jpg가 있으면 Before 스크린샷으로 첨부.
+    (백필용 — 접수 당시 화면을 작업자가 과거 커밋에서 캡처해 두는 경우)"""
+    path = os.path.join(client_dir, "feedback", "shots", f"{thread['id']}.jpg")
+    if os.path.isfile(path):
+        with open(path, "rb") as f:
+            encoded = base64.b64encode(f.read()).decode()
+        thread["beforeShot"] = f"data:image/jpeg;base64,{encoded}"
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
@@ -112,6 +123,8 @@ def main():
         key = find_anchor(row[0])
         groups.setdefault(key, []).append((i, row))
     threads = [to_thread(members) for members in groups.values()]
+    for t in threads:
+        attach_shot(t, client_dir)
     payload = {
         "project": os.path.basename(os.path.normpath(client_dir)),
         "schemaVersion": SCHEMA_VERSION,
