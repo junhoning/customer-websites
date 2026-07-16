@@ -7,7 +7,7 @@ export const PROCESS_SECTION = {
 } as const;
 
 export const PROCESS_STEPS = [
-  "무료 상담 접수",
+  "상담 접수",
   "선행조사·전략 수립",
   "출원·명세서 작성",
   "심사·의견 대응",

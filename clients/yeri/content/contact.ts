@@ -4,8 +4,8 @@ export const CONTACT_PAGE = {
   title: "상담 신청",
   description:
     "출원 여부가 고민되거나 분쟁 상황이라면 편하게 남겨 주세요. " +
-    "상담 비용은 없고, 접수하면 다음 영업일 안에 답변드립니다.",
-  metaDescription: "특허·상표·디자인 무료 상담 신청. 24시간 이내에 담당 변리사가 회신합니다.",
+    "접수하면 다음 영업일 안에 답변드립니다.",
+  metaDescription: "특허·상표·디자인 상담 신청. 24시간 이내에 담당 변리사가 회신합니다.",
 } as const;
 
 export const CONSULT_FORM = {
@@ -22,14 +22,14 @@ export const CONSULT_FORM = {
     linkLabel: "개인정보 수집·이용",
     after: "에 동의합니다. (상담 목적으로만 사용됩니다)",
   },
-  submitLabel: "무료 상담 신청하기",
+  submitLabel: "상담 신청하기",
   submittingLabel: "전송 중…",
   success: {
     title: "상담 신청이 접수되었습니다",
     description: "24시간 이내에 담당 변리사가 연락드리겠습니다.",
     againLabel: "다시 신청하기",
   },
-  errorMessage: "전송에 실패했습니다. 잠시 후 다시 시도하거나 전화로 문의해 주세요.",
+  errorMessage: "전송에 실패했습니다. 잠시 후 다시 시도하거나 카카오톡으로 문의해 주세요.",
 } as const;
 
 export const CONTACT_ASIDE = {
@@ -38,5 +38,5 @@ export const CONTACT_ASIDE = {
   infoTitle: "상담 안내",
   hoursLabel: "상담 시간",
   addressLabel: "주소",
-  freeNotice: "상담 비용은 무료입니다.",
+  costNotice: "상담은 기본 30분 5만원입니다. 복잡한 사안은 시간당 비용이 발생할 수 있습니다.",
 } as const;

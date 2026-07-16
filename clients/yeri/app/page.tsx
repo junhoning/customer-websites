@@ -3,6 +3,7 @@ import StatsBand from "@/components/home/stats-band";
 import ServiceCards from "@/components/home/service-cards";
 import ProcessSteps from "@/components/home/process-steps";
 import FaqList from "@/components/home/faq-list";
+import PartnerLogos from "@/components/home/partner-logos";
 import CtaBanner from "@/components/common/cta-banner";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
       <ServiceCards />
       <ProcessSteps />
       <FaqList />
+      <PartnerLogos />
       <CtaBanner />
     </main>
   );

@@ -117,9 +117,6 @@ export default function Footer() {
         <div>
           <ColTitle>연락처</ColTitle>
           <ContactList>
-            <li>
-              <a href={SITE.phoneHref}>T. {SITE.phone}</a>
-            </li>
             <li>{SITE.email}</li>
             <li>{SITE.address}</li>
             <li>{SITE.hours}</li>

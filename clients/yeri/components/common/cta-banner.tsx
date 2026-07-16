@@ -1,7 +1,7 @@
 "use client";
 
 import styled from "styled-components";
-import { Phone } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Section, SectionInner } from "@/components/common/section";
 import { ButtonLink } from "@/components/common/button";
 import { CTA_BANNER } from "@/content/cta";
@@ -50,9 +50,15 @@ export default function CtaBanner() {
           <ButtonLink href={CTA_BANNER.primaryHref} $variant="accent" $size="lg">
             {CTA_BANNER.primaryLabel}
           </ButtonLink>
-          <ButtonLink href={SITE.phoneHref} $variant="outlineOnDark" $size="lg">
-            <Phone size={18} aria-hidden />
-            {CTA_BANNER.phoneLabel} {SITE.phone}
+          <ButtonLink
+            href={SITE.kakaoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            $variant="outlineOnDark"
+            $size="lg"
+          >
+            <MessageCircle size={18} aria-hidden />
+            {CTA_BANNER.kakaoLabel}
           </ButtonLink>
         </Actions>
       </Inner>

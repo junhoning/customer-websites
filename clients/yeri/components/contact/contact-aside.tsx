@@ -1,7 +1,7 @@
 "use client";
 
 import styled from "styled-components";
-import { Phone, MessageCircle, Mail } from "lucide-react";
+import { MessageCircle, Mail } from "lucide-react";
 import { Card } from "@/components/common/card";
 import { CONTACT_ASIDE } from "@/content/contact";
 import { SITE } from "@/config/site";
@@ -68,10 +68,6 @@ export default function ContactAside() {
         <CardTitle>{CONTACT_ASIDE.channelsTitle}</CardTitle>
         <ChannelList>
           <li>
-            <Phone size={16} aria-hidden />
-            <a href={SITE.phoneHref}>{SITE.phone}</a>
-          </li>
-          <li>
             <MessageCircle size={16} aria-hidden />
             <a href={SITE.kakaoUrl} target="_blank" rel="noopener noreferrer">
               {CONTACT_ASIDE.kakaoLabel}
@@ -93,7 +89,7 @@ export default function ContactAside() {
           <li>
             <strong>{CONTACT_ASIDE.addressLabel}</strong> · {SITE.address}
           </li>
-          <li>{CONTACT_ASIDE.freeNotice}</li>
+          <li>{CONTACT_ASIDE.costNotice}</li>
         </InfoList>
       </Card>
     </Stack>

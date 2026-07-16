@@ -8,7 +8,7 @@ export const ABOUT_HERO = {
 } as const;
 
 export const PROFILE = {
-  photoAlt: "오예리 대표변리사 프로필 사진",
+  photoAlt: "오예리 대표 변호사·변리사 프로필 사진",
   photoSrc: "/representative.jpg", // TODO: 에셋 수령 후 플레이스홀더 대신 사용
   photoPlaceholder: "대표 프로필 사진 (플레이스홀더)",
   title: "기술과 브랜드를 함께 읽습니다",

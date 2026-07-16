@@ -54,7 +54,6 @@ const MapBox = styled.div`
 
 const INFO_ROWS = [
   { term: "주소", value: SITE.address },
-  { term: "전화", value: SITE.phone, href: SITE.phoneHref },
   { term: "이메일", value: SITE.email },
   { term: "상담 시간", value: SITE.hours },
 ] as const;
@@ -69,9 +68,7 @@ export default function Location() {
             {INFO_ROWS.map((row) => (
               <div key={row.term}>
                 <dt>{row.term}</dt>
-                <dd>
-                  {"href" in row ? <a href={row.href}>{row.value}</a> : row.value}
-                </dd>
+                <dd>{row.value}</dd>
               </div>
             ))}
           </InfoList>

@@ -5,7 +5,8 @@ export const SITE = {
   description:
     "오예리 특허법률사무소는 개인 발명가와 스타트업, 중소기업의 지식재산을 " +
     "출원 단계부터 등록과 분쟁 대응까지 책임집니다.",
-  representative: "오예리 대표변리사",
+  representative: "오예리 대표 변호사·변리사", // 피드백 #14 — 변호사 자격 추가
+  representativeEn: "dual-qualified Attorney-at-Law & Patent Attorney (Korea)",
 
   phone: "02-1234-5678", // TODO: 확정 후 교체
   phoneHref: "tel:02-1234-5678",

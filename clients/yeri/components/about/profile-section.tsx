@@ -36,6 +36,12 @@ const RepName = styled.p`
   color: ${({ theme }) => theme.color.accentText};
 `;
 
+const RepNameEn = styled.p`
+  margin-top: 0.125rem;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.color.muted};
+`;
+
 const Title = styled.h2`
   margin-top: 0.5rem;
   font-size: ${({ theme }) => theme.fontSize.h2};
@@ -76,6 +82,7 @@ export default function ProfileSection() {
           </Photo>
           <div>
             <RepName>{SITE.representative}</RepName>
+            <RepNameEn>{SITE.representativeEn}</RepNameEn>
             <Title>{PROFILE.title}</Title>
             <Description>{PROFILE.description}</Description>
             <CareerList>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import styled from "styled-components";
-import { Phone, MessageCircle, PenLine } from "lucide-react";
+import { MessageCircle, PenLine } from "lucide-react";
 import { media } from "@/styles/media";
 import { SITE } from "@/config/site";
 import { CTA_LINK } from "@/content/nav";
@@ -47,7 +47,7 @@ const MobileBar = styled.nav`
   inset: auto 0 0 0;
   z-index: ${({ theme }) => theme.z.mobileBar};
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   height: ${({ theme }) => theme.layout.mobileBarH};
   border-top: 1px solid ${({ theme }) => theme.color.line};
   background: ${({ theme }) => theme.color.background};
@@ -96,16 +96,9 @@ export default function FloatingActions() {
         >
           <MessageCircle size={22} aria-hidden />
         </CircleLink>
-        <CircleLink href={SITE.phoneHref} aria-label={`전화 상담 ${SITE.phone}`}>
-          <Phone size={22} aria-hidden />
-        </CircleLink>
       </DesktopStack>
 
       <MobileBar aria-label="빠른 상담 메뉴">
-        <BarItem href={SITE.phoneHref}>
-          <Phone size={18} aria-hidden />
-          전화
-        </BarItem>
         <BarItem href={SITE.kakaoUrl} target="_blank" rel="noopener noreferrer">
           <MessageCircle size={18} aria-hidden />
           카카오톡

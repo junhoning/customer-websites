@@ -1,6 +1,6 @@
 /* 홈 전용 문구 — 히어로 버튼과 업무 분야 섹션 헤딩 */
 export const HOME_HERO = {
-  primaryLabel: "무료 상담 신청",
+  primaryLabel: "상담 신청",
   primaryHref: "/contact",
   secondaryLabel: "서비스 안내",
   secondaryHref: "/services",
@@ -26,6 +26,21 @@ export const HOME_SERVICES_SECTION = {
   label: "업무 분야",
   title: "여섯 개 분야를 다룹니다",
   description:
-    "특허와 상표, 디자인 출원은 물론 심판과 소송, 해외출원까지 한 곳에서 진행합니다.",
+    "특허·상표·디자인·저작권 등록부터 조사와 전략, 침해 대응·영업비밀까지 한 곳에서 진행합니다.",
   cardCta: "자세히 보기 →",
 } as const;
+
+/* 피드백 #13 반영 — 협력·관련 기관 (로고 이미지 확보 시 텍스트 칩 대신 교체) */
+export const PARTNERS_SECTION = {
+  label: "협력·관련 기관",
+  title: "함께하는 기관",
+} as const;
+
+export const PARTNERS = [
+  "특허청",
+  "키프리스",
+  "한국발명진흥회",
+  "특허심판원",
+  "특허법원",
+  "칭화대학 (清华大学)",
+] as const;

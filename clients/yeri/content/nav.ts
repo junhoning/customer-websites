@@ -6,5 +6,5 @@ export const NAV_ITEMS = [
   { label: "상담 신청", href: "/contact" },
 ] as const;
 
-export const CTA_LINK = { label: "무료 상담", href: "/contact" } as const;
+export const CTA_LINK = { label: "상담 신청", href: "/contact" } as const;
 export const PRIVACY_LINK = { label: "개인정보처리방침", href: "/privacy" } as const;
