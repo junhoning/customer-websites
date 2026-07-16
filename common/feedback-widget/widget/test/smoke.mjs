@@ -99,26 +99,25 @@ let t1 = JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0];
 assert.equal(t1.comments.length, 2, "답글이 저장되지 않음");
 assert.equal(t1.comments[1].body, "반영해 주셔서 감사합니다");
 
-const delBtns = s1.querySelectorAll('button[aria-label="Delete comment"]');
-assert.equal(delBtns.length, 2, "코멘트마다 삭제 버튼이 없음");
-delBtns[1].click(); // 답글 삭제
-await wait(60);
-assert.ok(btnByText(s1, "Delete"), "삭제 확인 모달이 안 뜸");
-btnByText(s1, "Cancel").click();
+// 코멘트 보관(Archive) — 삭제 대체: 접었다 다시 펼 수 있다
+const archBtns = s1.querySelectorAll('button[aria-label="Archive comment"]');
+assert.equal(archBtns.length, 2, "코멘트마다 보관 버튼이 없음");
+archBtns[1].click(); // 답글 보관
 await wait(60);
 assert.equal(
-  JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0].comments.length,
-  2,
-  "취소했는데 답글이 삭제됨",
+  JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0].comments[1].archived,
+  true,
+  "보관이 저장되지 않음",
 );
-s1.querySelectorAll('button[aria-label="Delete comment"]')[1].click();
+assert.ok(btnByText(s1, "Show archived (1)"), "스레드 안 보관 그룹 버튼이 없음");
+btnByText(s1, "Show archived (1)").click();
 await wait(60);
-btnByText(s1, "Delete").click();
+s1.querySelector('button[aria-label="Unarchive comment"]').click();
 await wait(60);
-assert.equal(
-  JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0].comments.length,
-  1,
-  "확인했는데 답글이 안 지워짐",
+assert.notEqual(
+  JSON.parse(w1.localStorage.getItem("fbw:v2:default"))[0].comments[1].archived,
+  true,
+  "보관 해제가 안 됨",
 );
 
 // 7-1) 코멘트 수정 — 연필 → 인라인 편집기 → Save

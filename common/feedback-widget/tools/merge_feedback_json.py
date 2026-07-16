@@ -27,6 +27,8 @@ def flatten(thread: dict) -> str:
     created = first.get("createdAt", "")[:10]
     body = f"{first.get('body', '').strip()} (작성: {first.get('author', '고객')}, {created})"
     for reply in comments[1:]:
+        if reply.get("archived"):
+            continue  # 보관된 답글은 회신 요약에서 제외
         body += f" ↳ {reply.get('author', '고객')}: {reply.get('body', '').strip()}"
     return body
 

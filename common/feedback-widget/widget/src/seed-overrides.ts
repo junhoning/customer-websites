@@ -5,7 +5,8 @@ import type { Comment, CommentThread } from "./types";
 export interface SeedOverride {
   addedComments?: Comment[];
   editedBodies?: Record<string, string>; // 시드 원본 코멘트 본문 수정
-  hiddenCommentIds?: string[]; // 시드 원본 코멘트 삭제(숨김)
+  hiddenCommentIds?: string[]; // (구) 시드 원본 코멘트 삭제 — 하위 호환 유지
+  archivedCommentIds?: string[]; // 코멘트 보관 (삭제 대체)
   resolved?: boolean;
   hidden?: boolean;
 }
@@ -23,14 +24,18 @@ export function applySeedOverrides(
       const ov = overrides[t.id];
       if (!ov) return { ...t, origin: "seed" as const };
       const hiddenIds = new Set(ov.hiddenCommentIds ?? []);
-      const originals = t.comments
-        .filter((c) => !hiddenIds.has(c.id))
-        .map((c) => (ov.editedBodies?.[c.id] ? { ...c, body: ov.editedBodies[c.id] } : c));
+      const archivedIds = new Set(ov.archivedCommentIds ?? []);
+      const apply = (c: Comment): Comment => ({
+        ...c,
+        body: ov.editedBodies?.[c.id] ?? c.body,
+        archived: archivedIds.has(c.id) || c.archived,
+      });
+      const originals = t.comments.filter((c) => !hiddenIds.has(c.id)).map(apply);
       return {
         ...t,
         origin: "seed" as const,
         resolved: ov.resolved ?? t.resolved,
-        comments: [...originals, ...(ov.addedComments ?? [])],
+        comments: [...originals, ...(ov.addedComments ?? []).map(apply)],
       };
     })
     .filter((t) => t.comments.length > 0); // 코멘트가 다 지워진 스레드는 숨김
@@ -45,11 +50,10 @@ export function seedEditPatch(ov: SeedOverride, commentId: string, body: string)
   return { editedBodies: { ...ov.editedBodies, [commentId]: body } };
 }
 
-/* 코멘트 삭제 patch — 답글은 배열에서 제거, 원본은 숨김 목록에 추가 */
-export function seedRemovePatch(ov: SeedOverride, commentId: string): SeedOverride {
-  const added = ov.addedComments ?? [];
-  if (added.some((c) => c.id === commentId)) {
-    return { addedComments: added.filter((c) => c.id !== commentId) };
-  }
-  return { hiddenCommentIds: [...(ov.hiddenCommentIds ?? []), commentId] };
+/* 코멘트 보관 토글 patch — 원본·답글 모두 archivedCommentIds로 관리 */
+export function seedArchivePatch(ov: SeedOverride, commentId: string, on: boolean): SeedOverride {
+  const ids = new Set(ov.archivedCommentIds ?? []);
+  if (on) ids.add(commentId);
+  else ids.delete(commentId);
+  return { archivedCommentIds: [...ids] };
 }

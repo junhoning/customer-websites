@@ -37,7 +37,9 @@ export function ThreadView({
   const [author, setAuthor] = useState(store.author);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [areaShots, setAreaShots] = useState<{ before: string; after?: string } | null>(null);
+  const [showArchivedComments, setShowArchivedComments] = useState(false);
   const el = thread.anchor.page === location.pathname ? resolve(thread.anchor) : null;
+  const archivedComments = thread.comments.filter((c) => c.archived);
 
   /* 코멘트 썸네일 클릭 — 그 코멘트 시점(Before) vs 지금 즉석 캡처(After) */
   const compareWith = async (shot: string) => {
@@ -70,16 +72,35 @@ export function ThreadView({
       </HeaderRow>
 
       <ThreadStack>
-        {thread.comments.map((c, i) => (
-          <CommentRow
-            key={c.id}
-            store={store}
-            thread={thread}
-            comment={c}
-            prevVersion={i > 0 ? thread.comments[i - 1].version : undefined}
-            onCompare={compareWith}
-          />
-        ))}
+        {thread.comments
+          .filter((c) => !c.archived)
+          .map((c, i, list) => (
+            <CommentRow
+              key={c.id}
+              store={store}
+              thread={thread}
+              comment={c}
+              prevVersion={i > 0 ? list[i - 1].version : undefined}
+              onCompare={compareWith}
+            />
+          ))}
+        {archivedComments.length > 0 && (
+          <TextButton tone="muted" onClick={() => setShowArchivedComments((v) => !v)}>
+            {showArchivedComments
+              ? L.hideArchived(archivedComments.length)
+              : L.showArchived(archivedComments.length)}
+          </TextButton>
+        )}
+        {showArchivedComments &&
+          archivedComments.map((c) => (
+            <CommentRow
+              key={c.id}
+              store={store}
+              thread={thread}
+              comment={c}
+              onCompare={compareWith}
+            />
+          ))}
       </ThreadStack>
 
       {!store.author && (

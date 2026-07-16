@@ -1,15 +1,14 @@
-/* 스레드 팝오버의 코멘트 한 줄 — 우측 상단 Edit/Delete, 인라인 수정 편집기.
-   마지막 코멘트를 지우면 스레드 자체가 사라진다 (store 규칙) */
+/* 스레드 팝오버의 코멘트 한 줄 — 우측 상단 Edit/Archive, 인라인 수정 편집기.
+   보관(Archive)은 삭제 대체 — 되돌리기 가능해서 확인 모달이 없다 */
 import { useState } from "react";
 import styled from "styled-components";
 import {
+  ArchiveIcon,
   CommentInput,
   CommentItem,
   IconButton,
   PencilIcon,
   TextButton,
-  TrashIcon,
-  useConfirm,
 } from "@ingradient/ui";
 import type { Comment, CommentThread } from "../types";
 import type { Store } from "../store";
@@ -65,6 +64,11 @@ const EditorFoot = styled.div`
   justify-content: flex-start;
 `;
 
+/* 보관된 코멘트 — 지우지 않고 흐리게 접어둔다 */
+const Dim = styled.div<{ $archived: boolean }>`
+  opacity: ${(p) => (p.$archived ? 0.55 : 1)};
+`;
+
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
@@ -81,7 +85,6 @@ export function CommentRow({
   prevVersion?: string; // 직전 코멘트의 버전 (칩 강조 판단)
   onCompare: (shot: string) => void; // 썸네일 클릭 → 그 시점 vs 지금
 }) {
-  const confirm = useConfirm();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(comment.body);
 
@@ -92,17 +95,8 @@ export function CommentRow({
     setEditing(false);
   };
 
-  const remove = async () => {
-    const isLast = thread.comments.length === 1;
-    const ok = await confirm({
-      title: L.deleteCommentTitle,
-      description: isLast ? L.deleteLastCommentHint : comment.body,
-      confirmLabel: L.delete,
-      cancelLabel: L.cancel,
-      danger: true,
-    });
-    if (ok) store.removeComment(thread.id, comment.id);
-  };
+  const toggleArchive = () =>
+    store.setCommentArchived(thread.id, comment.id, !comment.archived);
 
   if (editing) {
     return (
@@ -124,6 +118,7 @@ export function CommentRow({
   }
 
   return (
+    <Dim $archived={!!comment.archived}>
     <CommentItem
       author={comment.author}
       timestamp={fmtDate(comment.createdAt)}
@@ -165,14 +160,15 @@ export function CommentRow({
           <IconButton
             variant="ghost"
             size="sm"
-            tone="danger"
-            aria-label={L.deleteCommentAria}
-            onClick={remove}
+            aria-label={comment.archived ? L.unarchiveCommentAria : L.archiveCommentAria}
+            title={comment.archived ? L.unarchiveCommentAria : L.archiveCommentAria}
+            onClick={toggleArchive}
           >
-            <TrashIcon size={14} />
+            <ArchiveIcon size={14} />
           </IconButton>
         </Actions>
       }
     />
+    </Dim>
   );
 }

@@ -4,8 +4,8 @@ import { uid, type Attachment, type Comment, type CommentThread } from "./types"
 import { liftLegacyShots, migrateV0 } from "./migrate";
 import {
   applySeedOverrides,
+  seedArchivePatch,
   seedEditPatch,
-  seedRemovePatch,
   type SeedOverride,
   type SeedOverrides,
 } from "./seed-overrides";
@@ -122,17 +122,25 @@ export class Store {
     this.persist();
   }
 
-  /* 코멘트 삭제 — 마지막 코멘트를 지우면 스레드도 사라진다 */
-  removeComment(threadId: string, commentId: string) {
+  /* 코멘트 보관 토글 — 삭제 대체 (되돌리기 가능, 스레드 안 Show archived에서 확인) */
+  setCommentArchived(threadId: string, commentId: string, on: boolean) {
     if (this.isSeed(threadId)) {
-      this.overrideSeed(threadId, seedRemovePatch(this.overrides[threadId] ?? {}, commentId));
+      this.overrideSeed(
+        threadId,
+        seedArchivePatch(this.overrides[threadId] ?? {}, commentId, on),
+      );
       return;
     }
-    this.threads = this.threads
-      .map((t) =>
-        t.id === threadId ? { ...t, comments: t.comments.filter((c) => c.id !== commentId) } : t,
-      )
-      .filter((t) => t.comments.length > 0);
+    this.threads = this.threads.map((t) =>
+      t.id === threadId
+        ? {
+            ...t,
+            comments: t.comments.map((c) =>
+              c.id === commentId ? { ...c, archived: on || undefined } : c,
+            ),
+          }
+        : t,
+    );
     this.persist();
   }
 

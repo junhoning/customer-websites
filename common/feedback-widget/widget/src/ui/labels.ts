@@ -25,14 +25,13 @@ export const L = {
   archivedBadge: "Archived",
   close: "Close",
   deleteThreadAria: "Delete thread",
-  deleteCommentAria: "Delete comment",
   editCommentAria: "Edit comment",
+  archiveCommentAria: "Archive comment",
+  unarchiveCommentAria: "Unarchive comment",
   save: "Save",
 
-  /* 삭제 확인 */
+  /* 삭제 확인 (스레드) */
   deleteThreadTitle: "Delete this comment thread?",
-  deleteCommentTitle: "Delete this comment?",
-  deleteLastCommentHint: "This is the last comment — the thread will be deleted.",
   delete: "Delete",
   cancel: "Cancel",
 

@@ -27,6 +27,8 @@ export interface Comment {
   shot?: string;
   /* 첨부 파일 — 스크린샷과 달리 콘텐츠이므로 내보내기에 포함된다 */
   attachments?: Attachment[];
+  /* 보관 — 삭제 대신 접어둔다 (되돌리기 가능). 스레드 안 Show archived로 확인 */
+  archived?: boolean;
 }
 
 export interface CommentThread {
@@ -46,6 +48,7 @@ export const uid = (): string =>
   globalThis.crypto?.randomUUID?.() ??
   `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-/* 스레드 요약(사이드바·핀 툴팁) — 최초 코멘트 본문 */
-export const threadBody = (t: CommentThread): string => t.comments[0]?.body ?? "";
-export const threadAuthor = (t: CommentThread): string => t.comments[0]?.author ?? "";
+/* 스레드 요약(사이드바·핀 툴팁) — 보관되지 않은 첫 코멘트 기준 */
+const headComment = (t: CommentThread) => t.comments.find((c) => !c.archived) ?? t.comments[0];
+export const threadBody = (t: CommentThread): string => headComment(t)?.body ?? "";
+export const threadAuthor = (t: CommentThread): string => headComment(t)?.author ?? "";
