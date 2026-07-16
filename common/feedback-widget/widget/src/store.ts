@@ -1,7 +1,7 @@
 /* 스레드 CRUD + localStorage 영속화 — UI를 모른다 (단방향: UI가 store를 구독)
    시드 override 계산은 seed-overrides.ts가 담당 */
 import { uid, type Comment, type CommentThread } from "./types";
-import { migrateV0 } from "./migrate";
+import { liftLegacyShots, migrateV0 } from "./migrate";
 import {
   applySeedOverrides,
   seedEditPatch,
@@ -23,7 +23,7 @@ export class Store {
   constructor(readonly project: string) {
     migrateV0(project);
     try {
-      this.threads = JSON.parse(localStorage.getItem(this.threadsKey) ?? "[]");
+      this.threads = liftLegacyShots(JSON.parse(localStorage.getItem(this.threadsKey) ?? "[]"));
       this.overrides = JSON.parse(localStorage.getItem(this.overridesKey) ?? "{}");
     } catch {
       this.threads = [];
@@ -66,7 +66,7 @@ export class Store {
 
   seed(items: CommentThread[]) {
     const localIds = new Set(this.threads.map((t) => t.id));
-    this.rawSeeds = items.filter((t) => !localIds.has(t.id));
+    this.rawSeeds = liftLegacyShots(items.filter((t) => !localIds.has(t.id)));
     this.refreshSeeds();
     this.notify();
   }
@@ -80,13 +80,14 @@ export class Store {
     this.persist();
   }
 
-  addComment(threadId: string, author: string, body: string, version?: string) {
+  addComment(threadId: string, author: string, body: string, version?: string, shot?: string) {
     const comment: Comment = {
       id: uid(),
       author,
       body,
       createdAt: new Date().toISOString(),
       version,
+      shot,
     };
     if (this.isSeed(threadId)) {
       const ov = this.overrides[threadId] ?? {};
@@ -174,7 +175,10 @@ export class Store {
       localStorage.setItem(this.threadsKey, JSON.stringify(this.threads));
     } catch {
       // 용량 초과(스크린샷 누적) — 스크린샷만 덜어내고 재시도
-      this.threads = this.threads.map(({ beforeShot: _shot, ...t }) => t);
+      this.threads = this.threads.map((t) => ({
+        ...t,
+        comments: t.comments.map(({ shot: _shot, ...c }) => c),
+      }));
       localStorage.setItem(this.threadsKey, JSON.stringify(this.threads));
     }
     this.notify();

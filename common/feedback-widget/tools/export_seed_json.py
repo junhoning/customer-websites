@@ -95,13 +95,13 @@ def to_thread(members: list) -> dict:
 
 
 def attach_shot(thread: dict, client_dir: str):
-    """feedback/shots/<스레드id>.jpg가 있으면 Before 스크린샷으로 첨부.
+    """feedback/shots/<스레드id>.jpg가 있으면 최초 코멘트의 스크린샷으로 첨부.
     (백필용 — 접수 당시 화면을 작업자가 과거 커밋에서 캡처해 두는 경우)"""
     path = os.path.join(client_dir, "feedback", "shots", f"{thread['id']}.jpg")
-    if os.path.isfile(path):
+    if os.path.isfile(path) and thread["comments"]:
         with open(path, "rb") as f:
             encoded = base64.b64encode(f.read()).decode()
-        thread["beforeShot"] = f"data:image/jpeg;base64,{encoded}"
+        thread["comments"][0]["shot"] = f"data:image/jpeg;base64,{encoded}"
 
 
 def main():

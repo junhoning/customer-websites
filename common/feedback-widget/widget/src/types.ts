@@ -14,8 +14,11 @@ export interface Comment {
   author: string;
   body: string;
   createdAt: string; // ISO
-  /* 작성 시점의 배포(커밋) 해시 — 전후 비교의 기준점 (additive, 없으면 비교 불가) */
+  /* 작성 시점의 배포(커밋) 해시 (정보 칩 표시용) */
   version?: string;
+  /* 작성 순간의 대상 영역 스크린샷(JPEG dataURL) — 코멘트마다 그 시점 모습이 남아
+     스레드가 시각적 타임라인이 된다. 내보내기에서는 제외 (용량) */
+  shot?: string;
 }
 
 export interface CommentThread {
@@ -25,8 +28,7 @@ export interface CommentThread {
   resolved: boolean; // 완료 처리 — 핀 숨김, 사이드바 "완료됨" 그룹으로
   comments: Comment[]; // [0] = 최초 코멘트 (스레드의 본문)
   meta: { userAgent: string; viewport: string };
-  /* 작성 순간의 대상 영역 스크린샷(JPEG dataURL) — 영역 전후 비교의 Before.
-     내보내기에서는 제외된다 (용량) */
+  /* @deprecated v0.7의 스레드 단위 스크린샷 — 로드 시 comments[0].shot으로 이관 */
   beforeShot?: string;
   /* "seed" = 작업자가 미리 실어 보낸 기존 접수분 (파일이 원본, 변경은 override 영속화) */
   origin?: "seed";

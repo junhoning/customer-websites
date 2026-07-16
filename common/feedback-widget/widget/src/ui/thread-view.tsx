@@ -1,14 +1,12 @@
 /* 스레드 팝오버 — 코멘트 대화 + 답글 입력 + 완료 + 전후 비교. 대상 요소 옆에 뜬다.
-   코멘트별 수정·삭제는 CommentRow가 담당 (마지막 코멘트 삭제 = 스레드 삭제) */
+   코멘트별 수정·삭제·스크린샷 썸네일은 CommentRow가 담당 (썸네일 클릭 = 그 시점 vs 지금) */
 import { useState } from "react";
-import styled from "styled-components";
 import {
   Badge,
   CheckIcon,
   ClosePanelIcon,
   CommentInput,
   CommentThread as ThreadStack,
-  ExpandIcon,
   IconButton,
   TextButton,
   TextField,
@@ -22,43 +20,6 @@ import { HeaderRow, HeaderTitle, Popover } from "./popover";
 import { AreaCompare } from "./area-compare";
 import { CommentRow } from "./comment-row";
 import { L } from "./labels";
-
-/* Before 스크린샷 인라인 썸네일 — BugHerd·Vercel처럼 대화 맨 위에 항상 보이고,
-   클릭하면 전후 비교가 열린다 (숨은 버튼 대신 콘텐츠로) */
-const ShotThumb = styled.button`
-  position: relative;
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: var(--ig-border-1px) solid var(--ig-color-border-subtle);
-  border-radius: var(--ig-radius-sm);
-  overflow: hidden;
-  cursor: pointer;
-  background: none;
-
-  img {
-    display: block;
-    width: 100%;
-  }
-  &:hover {
-    border-color: var(--ig-color-accent);
-  }
-`;
-
-const ThumbBadge = styled.span`
-  position: absolute;
-  right: var(--ig-space-2);
-  bottom: var(--ig-space-2);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ig-space-1);
-  padding: 2px var(--ig-space-3);
-  border-radius: var(--ig-radius-pill);
-  background: var(--ig-color-accent-strong);
-  color: var(--ig-color-on-accent);
-  font-size: var(--ig-font-size-2xs);
-  font-weight: var(--ig-font-weight-bold);
-`;
 
 export function ThreadView({
   store,
@@ -76,20 +37,20 @@ export function ThreadView({
   const [areaShots, setAreaShots] = useState<{ before: string; after?: string } | null>(null);
   const el = thread.anchor.page === location.pathname ? resolve(thread.anchor) : null;
 
-  /* 영역 스크린샷 비교 — 작성 순간 저장분(Before) vs 지금 즉석 캡처(After).
-     업계 표준(BugHerd·Marker.io) 방식 — 스크린샷 없는 스레드는 비활성 */
-  const openCompare = async () => {
-    if (!thread.beforeShot) return;
+  /* 코멘트 썸네일 클릭 — 그 코멘트 시점(Before) vs 지금 즉석 캡처(After) */
+  const compareWith = async (shot: string) => {
     const after = el ? await captureShot(el) : undefined;
-    setAreaShots({ before: thread.beforeShot, after });
+    setAreaShots({ before: shot, after });
   };
 
-  const reply = () => {
+  const reply = async () => {
     const trimmed = body.trim();
     if (!trimmed) return;
     const name = author.trim() || L.defaultAuthor;
     store.author = name;
-    store.addComment(thread.id, name, trimmed, CONFIG.version);
+    // 답글에도 그 시점 모습을 남긴다 — 스레드가 시각적 타임라인이 된다
+    const shot = el ? await captureShot(el) : undefined;
+    store.addComment(thread.id, name, trimmed, CONFIG.version, shot);
     setBody("");
   };
 
@@ -105,20 +66,6 @@ export function ThreadView({
         </IconButton>
       </HeaderRow>
 
-      {thread.beforeShot && (
-        <ShotThumb
-          type="button"
-          className="fbw-shot-thumb"
-          title={L.compareThumbHint}
-          onClick={openCompare}
-        >
-          <img src={thread.beforeShot} alt={L.before} />
-          <ThumbBadge>
-            <ExpandIcon size={12} /> {L.compare}
-          </ThumbBadge>
-        </ShotThumb>
-      )}
-
       <ThreadStack>
         {thread.comments.map((c, i) => (
           <CommentRow
@@ -127,6 +74,7 @@ export function ThreadView({
             thread={thread}
             comment={c}
             prevVersion={i > 0 ? thread.comments[i - 1].version : undefined}
+            onCompare={compareWith}
           />
         ))}
       </ThreadStack>

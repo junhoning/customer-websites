@@ -372,10 +372,10 @@ assert.equal(
   "답글에 version 미기록",
 );
 
-// 16) Compare 진입 = 인라인 썸네일 — 스크린샷(beforeShot)이 없으면 아예 안 보인다
+// 16) Compare 진입 = 코멘트별 인라인 썸네일 — 스크린샷(shot)이 없으면 아예 안 보인다
 //     (jsdom은 캔버스 미지원이라 캡처가 조용히 실패 → 저장은 정상, 썸네일만 없음)
 assert.equal(
-  JSON.parse(w6.localStorage.getItem("fbw:v2:default"))[0].beforeShot,
+  JSON.parse(w6.localStorage.getItem("fbw:v2:default"))[0].comments[0].shot,
   undefined,
   "캔버스 없는 환경에서 스크린샷이 저장됨(?)",
 );

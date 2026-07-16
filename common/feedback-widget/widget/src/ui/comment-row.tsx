@@ -22,6 +22,43 @@ const Actions = styled.span`
   gap: var(--ig-space-1);
 `;
 
+/* 코멘트에 딸린 "그때 모습" 썸네일 — 클릭하면 지금과 전후 비교 (Vercel 첨부물 패턴) */
+const ShotThumb = styled.button`
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-top: var(--ig-space-2);
+  padding: 0;
+  border: var(--ig-border-1px) solid var(--ig-color-border-subtle);
+  border-radius: var(--ig-radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  background: none;
+
+  img {
+    display: block;
+    width: 100%;
+    max-height: 140px;
+    object-fit: cover;
+    object-position: top;
+  }
+  &:hover {
+    border-color: var(--ig-color-accent);
+  }
+`;
+
+const ThumbBadge = styled.span`
+  position: absolute;
+  right: var(--ig-space-2);
+  bottom: var(--ig-space-2);
+  padding: 1px var(--ig-space-3);
+  border-radius: var(--ig-radius-pill);
+  background: var(--ig-color-accent-strong);
+  color: var(--ig-color-on-accent);
+  font-size: var(--ig-font-size-3xs, 10px);
+  font-weight: var(--ig-font-weight-bold);
+`;
+
 const EditorFoot = styled.div`
   display: flex;
   justify-content: flex-start;
@@ -35,11 +72,13 @@ export function CommentRow({
   thread,
   comment,
   prevVersion,
+  onCompare,
 }: {
   store: Store;
   thread: CommentThread;
   comment: Comment;
   prevVersion?: string; // 직전 코멘트의 버전 (칩 강조 판단)
+  onCompare: (shot: string) => void; // 썸네일 클릭 → 그 시점 vs 지금
 }) {
   const confirm = useConfirm();
   const [editing, setEditing] = useState(false);
@@ -87,7 +126,22 @@ export function CommentRow({
     <CommentItem
       author={comment.author}
       timestamp={fmtDate(comment.createdAt)}
-      body={comment.body}
+      body={
+        <>
+          {comment.body}
+          {comment.shot && (
+            <ShotThumb
+              type="button"
+              className="fbw-shot-thumb"
+              title={L.compareThumbHint}
+              onClick={() => onCompare(comment.shot!)}
+            >
+              <img src={comment.shot} alt={L.before} />
+              <ThumbBadge>{L.compare}</ThumbBadge>
+            </ShotThumb>
+          )}
+        </>
+      }
       actions={
         <Actions>
           {comment.version && (

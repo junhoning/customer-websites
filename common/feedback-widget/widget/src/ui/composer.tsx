@@ -41,21 +41,20 @@ export function Composer({
     const name = author.trim() || L.defaultAuthor;
     store.author = name;
     const now = new Date().toISOString();
-    // 지금 이 순간의 대상 영역을 저장 — 나중에 "수정 전" 모습이 된다
-    const beforeShot = await captureShot(el);
+    // 지금 이 순간의 대상 영역을 저장 — 이 코멘트에 "그때 모습"이 남는다
+    const shot = await captureShot(el);
     const thread: CommentThread = {
       id: uid(),
       createdAt: now,
       anchor,
       resolved: false,
       comments: [
-        { id: uid(), author: name, body: trimmed, createdAt: now, version: CONFIG.version },
+        { id: uid(), author: name, body: trimmed, createdAt: now, version: CONFIG.version, shot },
       ],
       meta: {
         userAgent: navigator.userAgent,
         viewport: `${window.innerWidth}x${window.innerHeight}`,
       },
-      beforeShot,
     };
     store.addThread(thread);
     onSaved(thread);

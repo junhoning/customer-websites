@@ -52,3 +52,13 @@ export function migrateV0(project: string) {
   localStorage.removeItem(oldKey);
   localStorage.removeItem(oldOverridesKey);
 }
+
+/* v0.7 스레드 단위 스크린샷(beforeShot) → 코멘트 단위(comments[0].shot) 이관.
+   저장분·시드 모두 로드 시점에 통과시킨다 */
+export function liftLegacyShots(threads: CommentThread[]): CommentThread[] {
+  return threads.map((t) => {
+    if (!t.beforeShot || t.comments.length === 0 || t.comments[0].shot) return t;
+    const { beforeShot, ...rest } = t;
+    return { ...rest, comments: [{ ...t.comments[0], shot: beforeShot }, ...t.comments.slice(1)] };
+  });
+}
