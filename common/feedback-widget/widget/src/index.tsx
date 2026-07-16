@@ -2,8 +2,10 @@
 import { createRoot } from "react-dom/client";
 import { StyleSheetManager } from "styled-components";
 import tokensCss from "@ingradient/ui/tokens.css";
+import { CONFIG } from "./config";
 import { Store } from "./store";
 import { HOST_ID, consumePendingJump } from "./anchor";
+import { initEmbed } from "./embed";
 import { App } from "./ui/app";
 
 const Z_INDEX = 2147483000; // 고객사 어떤 요소보다 위
@@ -28,14 +30,12 @@ const baseCss = `
 .fbw-root *, .fbw-root *::before, .fbw-root *::after { box-sizing: border-box; }
 `;
 
-/* currentScript는 스크립트 평가 시점에만 유효 — 모듈 스코프에서 즉시 읽는다 */
-const SCRIPT =
-  (document.currentScript as HTMLScriptElement | null) ??
-  document.querySelector<HTMLScriptElement>("script[data-project]");
-const PROJECT = SCRIPT?.dataset.project ?? "default";
-const SEED_URL = SCRIPT?.dataset.seed; // 기존 접수분 JSON (선택)
-
 function mount() {
+  if (CONFIG.embed) {
+    // 비교 뷰 iframe 안 — UI 없이 점프 수신부만 (전후비교-기획서 §2.3)
+    initEmbed();
+    return;
+  }
   if (document.getElementById(HOST_ID)) return; // 중복 주입 방지
 
   const host = document.createElement("div");
@@ -51,7 +51,7 @@ function mount() {
   shadow.append(style, scTarget, rootEl);
   document.body.appendChild(host);
 
-  const store = new Store(PROJECT);
+  const store = new Store(CONFIG.project);
   createRoot(rootEl).render(
     <StyleSheetManager target={scTarget}>
       <App store={store} />
@@ -59,8 +59,8 @@ function mount() {
   );
 
   /* 기존 접수분(시드) 로드 — 실패해도 위젯 동작에는 영향 없음 */
-  if (SEED_URL && typeof fetch === "function") {
-    fetch(SEED_URL)
+  if (CONFIG.seedUrl && typeof fetch === "function") {
+    fetch(CONFIG.seedUrl)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (Array.isArray(data?.threads)) store.seed(data.threads);

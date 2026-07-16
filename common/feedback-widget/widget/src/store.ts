@@ -90,8 +90,14 @@ export class Store {
     this.persist();
   }
 
-  addComment(threadId: string, author: string, body: string) {
-    const comment: Comment = { id: uid(), author, body, createdAt: new Date().toISOString() };
+  addComment(threadId: string, author: string, body: string, version?: string) {
+    const comment: Comment = {
+      id: uid(),
+      author,
+      body,
+      createdAt: new Date().toISOString(),
+      version,
+    };
     if (this.isSeed(threadId)) {
       const ov = this.overrides[threadId] ?? {};
       this.overrideSeed(threadId, { addedComments: [...(ov.addedComments ?? []), comment] });

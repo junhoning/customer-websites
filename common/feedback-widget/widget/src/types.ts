@@ -14,6 +14,8 @@ export interface Comment {
   author: string;
   body: string;
   createdAt: string; // ISO
+  /* 작성 시점의 배포(커밋) 해시 — 전후 비교의 기준점 (additive, 없으면 비교 불가) */
+  version?: string;
 }
 
 export interface CommentThread {

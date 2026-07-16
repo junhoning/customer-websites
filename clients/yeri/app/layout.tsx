@@ -50,6 +50,7 @@ export default function RootLayout({
             src={feedbackWidgetSrc}
             data-project="yeri"
             data-seed="/feedback-seed.json"
+            data-version={process.env.NEXT_PUBLIC_GIT_SHA}
             strategy="afterInteractive"
           />
         )}

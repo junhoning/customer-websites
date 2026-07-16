@@ -308,5 +308,85 @@ assert.ok(
 const popover5 = s5.querySelector(".fbw-thread");
 assert.ok(popover5, "카드 클릭 시 스레드 팝오버가 안 열림");
 assert.ok(popover5.parentElement.textContent.includes("폴백 점프 테스트"), "팝오버 내용 불일치");
+// version 없는 스레드 — Compare 비활성
+assert.ok(btnByText(s5, "Compare").disabled, "version 없는 스레드인데 Compare가 활성");
 
-console.log(`✅ 스모크 테스트 통과 (번들 ${kb.toFixed(1)}KB, 14개 시나리오)`);
+// 15) 버전 기록 — data-version이 최초 코멘트·답글에 기록되고 칩이 보인다
+const VERSION_PAGE = PAGE.replace(
+  "</body>",
+  `<script data-project="default" data-version="aaa1111"></script></body>`,
+);
+const w6 = await boot((w) => {
+  w.sessionStorage.setItem("fbw:mode:default", "1");
+}, VERSION_PAGE);
+const s6 = shadowOf(w6);
+rightClick(w6, w6.document.getElementById("title"));
+await wait(60);
+setValue(w6, s6.querySelector("textarea"), "버전 기록 테스트");
+await wait(30);
+btnByText(s6, "Post").click();
+await wait(60);
+const vThread = JSON.parse(w6.localStorage.getItem("fbw:v2:default"))[0];
+assert.equal(vThread.comments[0].version, "aaa1111", "최초 코멘트에 version 미기록");
+assert.ok(s6.querySelector(".fbw-verchip"), "버전 칩이 안 보임");
+assert.equal(s6.querySelector(".fbw-verchip").textContent, "aaa1111");
+setValue(w6, s6.querySelector(".fbw-thread").parentElement.querySelector("textarea"), "답글에도 버전");
+await wait(30);
+btnByText(s6, "Reply").click();
+await wait(60);
+assert.equal(
+  JSON.parse(w6.localStorage.getItem("fbw:v2:default"))[0].comments[1].version,
+  "aaa1111",
+  "답글에 version 미기록",
+);
+
+// 16) Compare 오버레이 — Before(:3001)/After(현재) iframe이 embed URL로 뜬다
+assert.ok(!btnByText(s6, "Compare").disabled, "version 있는데 Compare 비활성");
+btnByText(s6, "Compare").click();
+await wait(60);
+const overlay = s6.querySelector(".fbw-compare");
+assert.ok(overlay, "비교 오버레이가 안 뜸");
+assert.equal(
+  overlay.querySelector(".fbw-compare-before").getAttribute("src"),
+  "http://localhost:3001/?fbw=embed",
+  "Before iframe URL 불일치",
+);
+assert.equal(
+  overlay.querySelector(".fbw-compare-after").getAttribute("src"),
+  "http://localhost/?fbw=embed",
+  "After iframe URL 불일치",
+);
+assert.ok(overlay.textContent.includes("aaa1111"), "헤더에 Before 버전 표기 없음");
+overlay.querySelector('button[aria-label="Close"]').click();
+await wait(60);
+assert.equal(s6.querySelector(".fbw-compare"), null, "오버레이가 안 닫힘");
+
+// 17) embed 모드 — URL 파라미터(?fbw=embed)로 부팅하면 UI 없이 점프 수신부만 동작
+const w8 = await (async () => {
+  const dom = new JSDOM(PAGE, {
+    url: "http://localhost/?fbw=embed",
+    runScripts: "outside-only",
+    pretendToBeVisual: true,
+  });
+  dom.window.scrollTo = () => {};
+  dom.window.sessionStorage.setItem("fbw:mode:default", "1"); // 모드가 켜져 있어도 UI가 없어야 한다
+  dom.window.eval(code);
+  await wait(120);
+  return dom.window;
+})();
+assert.equal(w8.document.getElementById("fbw-host"), null, "embed 모드인데 위젯 UI가 마운트됨");
+w8.dispatchEvent(
+  new w8.MessageEvent("message", {
+    data: {
+      type: "fbw:jump",
+      anchor: { page: "/", selector: "#title", textSnippet: "", scrollY: 0 },
+    },
+  }),
+);
+await wait(500); // flash는 스크롤 안착 후 350ms
+assert.ok(
+  w8.document.getElementById("title").style.outline.includes("3px solid"),
+  "embed 모드에서 fbw:jump 점프가 안 됨",
+);
+
+console.log(`✅ 스모크 테스트 통과 (번들 ${kb.toFixed(1)}KB, 17개 시나리오)`);

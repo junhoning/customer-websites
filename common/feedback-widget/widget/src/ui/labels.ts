@@ -47,6 +47,14 @@ export const L = {
   downloadJson: "Download JSON",
   replies: "replies", // "· N replies"
 
+  /* 전후 비교 */
+  compare: "Compare",
+  compareDisabledHint: "No version recorded for this thread",
+  before: "Before",
+  after: "After",
+  current: "current",
+  versionChipTitle: "Set as compare baseline (Before)",
+
   /* 기본 작성자 (이름 미입력 시) */
   defaultAuthor: "Guest",
 } as const;

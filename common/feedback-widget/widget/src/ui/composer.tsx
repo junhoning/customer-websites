@@ -2,6 +2,7 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { CommentInput, ClosePanelIcon, IconButton, TextField } from "@ingradient/ui";
+import { CONFIG } from "../config";
 import { uid, type Anchor, type CommentThread } from "../types";
 import type { Store } from "../store";
 import { HeaderRow, HeaderTitle, Popover } from "./popover";
@@ -44,7 +45,9 @@ export function Composer({
       createdAt: now,
       anchor,
       resolved: false,
-      comments: [{ id: uid(), author: name, body: trimmed, createdAt: now }],
+      comments: [
+        { id: uid(), author: name, body: trimmed, createdAt: now, version: CONFIG.version },
+      ],
       meta: {
         userAgent: navigator.userAgent,
         viewport: `${window.innerWidth}x${window.innerHeight}`,
