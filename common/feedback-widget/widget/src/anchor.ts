@@ -1,8 +1,9 @@
 /* 위치 캡처/복원/하이라이트 — 순수 DOM 로직. 이벤트를 직접 걸지 않는다 */
 import type { Anchor } from "./types";
-import { T } from "./tokens";
 
 export const HOST_ID = "fbw-host";
+/* 페이지 요소에 인라인으로 칠하는 색 — --ig 변수는 Shadow 밖에서 못 쓰므로 리터럴 */
+const FLASH_COLOR = "#2563eb";
 const PENDING_KEY = "fbw:pending-jump";
 /* jsdom 등 CSS.escape 미구현 환경 폴백 */
 const cssEscape = (s: string) =>
@@ -64,7 +65,7 @@ export function flash(el: Element, duration = 2500) {
   const style = (el as HTMLElement).style;
   if (!style) return;
   const prev = { outline: style.outline, offset: style.outlineOffset };
-  style.outline = `3px solid ${T.color.accent}`;
+  style.outline = `3px solid ${FLASH_COLOR}`;
   style.outlineOffset = "3px";
   setTimeout(() => {
     style.outline = prev.outline;

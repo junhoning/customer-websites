@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild src/index.tsx --bundle --minify --format=iife --outfile=dist/widget.js --jsx=automatic --loader:.css=text",
-    "dev": "esbuild src/index.tsx --bundle --format=iife --outfile=dist/widget.js --jsx=automatic --loader:.css=text --watch=forever --servedir=dist --serve=0.0.0.0:4000",
+    "build": "esbuild src/index.tsx --bundle --minify --format=iife --outfile=dist/widget.js --jsx=automatic --loader:.css=text --define:import.meta.url='\"http://localhost/\"'",
+    "dev": "esbuild src/index.tsx --bundle --format=iife --outfile=dist/widget.js --jsx=automatic --loader:.css=text --define:import.meta.url='\"http://localhost/\"' --watch=forever --servedir=dist --serve=0.0.0.0:4000",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node test/smoke.mjs"
   },

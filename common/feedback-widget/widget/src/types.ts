@@ -1,13 +1,6 @@
-/* 데이터 타입 정의 — 유형·중요도·상태는 엑셀 양식과 같은 어휘를 쓴다 */
+/* 데이터 타입 — v2: 코멘트 스레드 모델 (유형·중요도 없음, resolved만 유지) */
 
-export const TYPES = ["문구", "디자인", "구조", "정보", "기능", "오류"] as const;
-export type FeedbackType = (typeof TYPES)[number];
-
-export const PRIORITIES = ["A", "B", "C"] as const;
-export type Priority = (typeof PRIORITIES)[number];
-
-export const STATUSES = ["대기", "진행 중", "완료", "확인 필요"] as const;
-export type Status = (typeof STATUSES)[number];
+export const SCHEMA_VERSION = 2;
 
 export interface Anchor {
   page: string; // pathname
@@ -16,20 +9,28 @@ export interface Anchor {
   scrollY: number; // 최후 폴백
 }
 
-export interface FeedbackItem {
+export interface Comment {
   id: string;
-  createdAt: string; // ISO
   author: string;
+  body: string;
+  createdAt: string; // ISO
+}
+
+export interface CommentThread {
+  id: string;
+  createdAt: string; // ISO — 스레드(최초 코멘트) 작성 시각
   anchor: Anchor;
-  type: FeedbackType;
-  priority: Priority;
-  content: string;
-  status: Status; // v0: 표시 전용
+  resolved: boolean; // 완료 처리 — 핀 숨김, 사이드바 "완료됨" 그룹으로
+  comments: Comment[]; // [0] = 최초 코멘트 (스레드의 본문)
   meta: { userAgent: string; viewport: string };
-  /* "seed" = 작업자가 미리 실어 보낸 기존 피드백 (읽기 전용, 내보내기 제외) */
+  /* "seed" = 작업자가 미리 실어 보낸 기존 접수분 (파일이 원본, 변경은 override 영속화) */
   origin?: "seed";
 }
 
 export const uid = (): string =>
   globalThis.crypto?.randomUUID?.() ??
   `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+/* 스레드 요약(사이드바·핀 툴팁) — 최초 코멘트 본문 */
+export const threadBody = (t: CommentThread): string => t.comments[0]?.body ?? "";
+export const threadAuthor = (t: CommentThread): string => t.comments[0]?.author ?? "";

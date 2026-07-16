@@ -46,8 +46,10 @@ Comment { id, author, body, createdAt }
   styled-components `StyleSheetManager target={shadowRoot}`로 스타일을 섀도 안에 가둔다.
 - 토큰: 자체 `tokens.ts`를 버리고 `@ingradient/ui/tokens.css`(`--ig-*` 변수 931개)를
   섀도 루트에 `<style>`로 주입한다.
-- **번들 예산 변경: 30KB → 300KB.** React+styled-components 동반 비용. 리뷰 모드에서만
-  로드되는 도구라 수용 가능. react로 확정 (근거는 §9 Q1, §10).
+- **번들 예산 변경: 30KB → 450KB (실측 404KB, gzip 전송 ≈ 104KB).** React+styled-components
+  동반 비용. 리뷰 모드에서만 로드되는 도구라 수용 가능. react로 확정 (근거는 §9 Q1, §10).
+  ※ ingradient-ui가 서브패스당 단일 파일로 빌드돼 미사용 컴포넌트가 tree-shaking되지
+  않는다 — 라이브러리 빌드를 컴포넌트별 분할로 바꾸면 감량 가능 (v1 과제).
 
 ## 4. 치환 지도 — 없앨 것 / 가져올 것
 

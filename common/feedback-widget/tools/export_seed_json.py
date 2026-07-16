@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-"""feedback_data.py의 접수 피드백을 위젯 시드 JSON으로 내보낸다.
+"""feedback_data.py의 접수 피드백을 위젯 시드 JSON(코멘트 스레드 v2)으로 내보낸다.
 사용법: python3 common/feedback-widget/tools/export_seed_json.py clients/<고객폴더>
-출력:   clients/<고객폴더>/public/feedback-seed.json (위젯이 부팅 시 fetch)"""
+출력:   clients/<고객폴더>/public/feedback-seed.json (위젯이 부팅 시 fetch)
+
+시드 변환 규칙 (기획서 §9 Q2): 유형·중요도는 버리고,
+진행 상태 "완료"만 resolved: true로 가져온다. 각 항목 = 코멘트 1개짜리 스레드."""
 import importlib.util
 import json
 import os
@@ -45,6 +48,7 @@ ANCHORS = {
 }
 
 RECEIVED_AT = "2026-07-15T00:00:00.000Z"  # 피드백 수령일
+SCHEMA_VERSION = 2
 
 
 def find_anchor(location: str):
@@ -54,20 +58,24 @@ def find_anchor(location: str):
     return ANCHORS["기타"]
 
 
-def to_item(n: int, row: tuple) -> dict:
-    location, type_full, content, ref, pri_full, status_full = row
+def to_thread(n: int, row: tuple) -> dict:
+    location, _type, content, ref, _pri, status_full = row
     page, selector, snippet = find_anchor(location)
-    status = "확인 필요" if status_full.startswith("확인 필요") else status_full
+    # 위치 접두어는 넣지 않는다 — 위젯에서 클릭/hover로 위치가 표시되므로 중복
+    body = content + (f" — 참고: {ref}" if ref else "")
     return {
         "id": f"seed-{n:02d}",
         "createdAt": RECEIVED_AT,
-        "author": "고객 (기존 접수)",
         "anchor": {"page": page, "selector": selector, "textSnippet": snippet, "scrollY": 0},
-        "type": type_full.split(" ")[0],
-        "priority": pri_full[0],
-        # 위치 접두어는 넣지 않는다 — 위젯에서 클릭/hover로 위치가 표시되므로 중복
-        "content": content + (f" — 참고: {ref}" if ref else ""),
-        "status": status,
+        "resolved": status_full == "완료",
+        "comments": [
+            {
+                "id": f"seed-{n:02d}-c1",
+                "author": "고객 (기존 접수)",
+                "body": body,
+                "createdAt": RECEIVED_AT,
+            }
+        ],
         "meta": {"userAgent": "", "viewport": ""},
         "origin": "seed",
     }
@@ -86,15 +94,16 @@ def main():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
-    items = [to_item(i, row) for i, row in enumerate(mod.FEEDBACK_ITEMS, start=1)]
+    threads = [to_thread(i, row) for i, row in enumerate(mod.FEEDBACK_ITEMS, start=1)]
     payload = {
         "project": os.path.basename(os.path.normpath(client_dir)),
+        "schemaVersion": SCHEMA_VERSION,
         "exportedAt": datetime.now(timezone.utc).isoformat(),
-        "items": items,
+        "threads": threads,
     }
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
-    print(f"시드 생성 완료: {out_path} ({len(items)}건)")
+    print(f"시드 생성 완료: {out_path} ({len(threads)}건)")
 
 
 if __name__ == "__main__":
