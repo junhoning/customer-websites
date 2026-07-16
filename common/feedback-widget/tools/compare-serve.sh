@@ -17,6 +17,8 @@ cleanup() {
   echo "▶ worktree 정리"
   git -C "$ROOT" worktree remove --force "$WT" 2>/dev/null || true
 }
+# INT/TERM도 잡아야 kill로 종료해도 worktree가 정리된다
+trap 'cleanup; exit 130' INT TERM
 trap cleanup EXIT
 
 # .env.local은 gitignore라 worktree에 없다 — 위젯 활성화(NEXT_PUBLIC_FEEDBACK)에 필요
